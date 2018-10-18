@@ -1,7 +1,16 @@
 require 'gosu'
+require_relative 'game'
 
 class Clue < Gosu::Window
- "this is a test folks"
+
+  def initialize
+    @window = window
+    @spaces = []
+  end
+
+  def needs_cursor?
+    true
+  end
 end
 
 window = Clue.new
