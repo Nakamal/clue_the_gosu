@@ -1,3 +1,5 @@
+
+
 require 'gosu'
 require_relative 'space'
 
@@ -6,9 +8,9 @@ class Board
   attr_accessor :window, :rows, :columns, :grid
 
   def initialize(input_hash)
-    @window = input_hash[:window]
-    @rows = input_hash[:rows]
-    @columns = input_hash[:columns]
+    # @window = input_hash[:window]
+    # @rows = input_hash[:rows]
+    # @columns = input_hash[:columns]
     @grid = [
               [Space.new(window: window, row: 0, column: 0, role: :room           ), Space.new(window: window, row: 0, column: 1, role: :room           ),Space.new(window: window, row: 0, column: 2, role: :room           ),Space.new(window: window, row: 0, column: 3, role: :room           ),Space.new(window: window, row: 0, column: 4, role: :room           ),Space.new(window: window, row: 0, column: 5, role: :room           ),Space.new(window: window, row: 0, column: 6, role: :room           ),Space.new(window: window, row: 0, column: 7, role: :playable       ),Space.new(window: window, row: 0, column: 8, role: :home           ),Space.new(window: window, row: 0, column: 9, role: :room           ),Space.new(window: window, row: 0, column: 10, role: :room          ),Space.new(window: window, row: 0, column: 11, role: :room          ),Space.new(window: window, row: 0, column: 12, role: :room          ),Space.new(window: window, row: 0, column: 13, role: :room          ),Space.new(window: window, row: 0, column: 14, role: :room          ),Space.new(window: window, row: 0, column: 15, role: :non_playable  ),Space.new(window: window, row: 0, column: 16, role: :home          ),Space.new(window: window, row: 0, column: 17, role: :room          ),Space.new(window: window, row: 0, column: 18, role: :room          ),Space.new(window: window, row: 0, column: 19, role: :room          ),Space.new(window: window, row: 0, column: 20, role: :room          ),Space.new(window: window, row: 0, column: 21, role: :room          ),Space.new(window: window, row: 0, column: 22, role: :room          ),Space.new(window: window, row: 0, column: 23, role: :room          )], 
               [Space.new(window: window, row: 1, column: 0, role: :room           ), Space.new(window: window, row: 1, column: 1, role: :room           ),Space.new(window: window, row: 1, column: 2, role: :room           ),Space.new(window: window, row: 1, column: 3, role: :room           ),Space.new(window: window, row: 1, column: 4, role: :room           ),Space.new(window: window, row: 1, column: 5, role: :room           ),Space.new(window: window, row: 1, column: 6, role: :room           ),Space.new(window: window, row: 1, column: 7, role: :playable       ),Space.new(window: window, row: 1, column: 8, role: :playable       ),Space.new(window: window, row: 1, column: 9, role: :room           ),Space.new(window: window, row: 1, column: 10, role: :room          ),Space.new(window: window, row: 1, column: 11, role: :room          ),Space.new(window: window, row: 1, column: 12, role: :room          ),Space.new(window: window, row: 1, column: 13, role: :room          ),Space.new(window: window, row: 1, column: 14, role: :room          ),Space.new(window: window, row: 1, column: 15, role: :playable      ),Space.new(window: window, row: 1, column: 16, role: :playable      ),Space.new(window: window, row: 1, column: 17, role: :room          ),Space.new(window: window, row: 1, column: 18, role: :room          ),Space.new(window: window, row: 1, column: 19, role: :room          ),Space.new(window: window, row: 1, column: 20, role: :room          ),Space.new(window: window, row: 1, column: 21, role: :room          ),Space.new(window: window, row: 1, column: 22, role: :room          ),Space.new(window: window, row: 1, column: 23, role: :room          )], 
@@ -37,4 +39,12 @@ class Board
               [Space.new(window: window, row: 24, column: 0, role: :non_playable  ), Space.new(window: window, row: 24, column: 1, role: :non_playable  ),Space.new(window: window, row: 24, column: 2, role: :non_playable  ),Space.new(window: window, row: 24, column: 3, role: :non_playable  ),Space.new(window: window, row: 24, column: 4, role: :non_playable  ),Space.new(window: window, row: 24, column: 5, role: :non_playable  ),Space.new(window: window, row: 24, column: 6, role: :non_playable  ),Space.new(window: window, row: 24, column: 7, role: :non_playable  ),Space.new(window: window, row: 24, column: 8, role: :non_playable  ),Space.new(window: window, row: 24, column: 9, role: :home          ),Space.new(window: window, row: 24, column: 10, role: :non_playable ),Space.new(window: window, row: 24, column: 11, role: :non_playable ),Space.new(window: window, row: 24, column: 12, role: :non_playable ),Space.new(window: window, row: 24, column: 13, role: :non_playable ),Space.new(window: window, row: 24, column: 14, role: :home         ),Space.new(window: window, row: 24, column: 15, role: :non_playable ),Space.new(window: window, row: 24, column: 16, role: :non_playable ),Space.new(window: window, row: 24, column: 17, role: :non_playable ),Space.new(window: window, row: 24, column: 18, role: :non_playable ),Space.new(window: window, row: 24, column: 19, role: :non_playable ),Space.new(window: window, row: 24, column: 20, role: :non_playable ),Space.new(window: window, row: 24, column: 21, role: :non_playable ),Space.new(window: window, row: 24, column: 22, role: :non_playable ),Space.new(window: window, row: 24, column: 23, role: :non_playable )]
             ]
   end
+
+  def terminal_print
+    @grid.each do |row|
+      puts row.map {|space| space.color_print }.join
+    end
+  end
 end
+
+Board.new({}).terminal_print

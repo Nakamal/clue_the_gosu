@@ -1,3 +1,6 @@
+require 'paint'
+
+
 require 'gosu'
 
 class Space
@@ -19,6 +22,18 @@ class Space
     else
       nil
     end
+  end
+
+  def color_print
+    color_key = {
+      home: '#000088',
+      room: '#008800',
+      playable: '#880088',
+      non_playable: '#000000',
+      door: '#888800'
+    }
+
+    Paint["██", color_key[role]]
   end
 
   def possible_path!
