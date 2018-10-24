@@ -1,5 +1,3 @@
-
-
 require 'gosu'
 require_relative 'space'
 

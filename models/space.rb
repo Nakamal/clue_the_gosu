@@ -1,7 +1,6 @@
 require 'paint'
-
-
 require 'gosu'
+
 
 class Space
 
