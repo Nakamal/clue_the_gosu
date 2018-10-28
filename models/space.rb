@@ -1,6 +1,9 @@
 require 'paint'
 require 'gosu'
 
+SQUARE_WIDTH = 100
+Y_OFFSET = 10
+X_OFFSET = 10
 
 class Space
 
@@ -12,6 +15,22 @@ class Space
     @column = input_hash[:column]
     @role = input_hash[:role] || :playable
     @step = 0
+  end
+
+  def starting_x
+    p row * SQUARE_WIDTH
+  end
+
+  def starting_y
+    p (column * SQUARE_WIDTH) + Y_OFFSET
+  end
+
+  def middle_x
+    p starting_x + (SQUARE_WIDTH / 2)
+  end
+
+  def middle_y
+    p starting_y + (SQUARE_WIDTH / 2)
   end
 
   def label_path(current_step)
@@ -53,6 +72,10 @@ class Space
 
   def room?
     role == :room
+  end
+
+  def draw
+    square = (starting_x + starting_y)
   end
 
 end

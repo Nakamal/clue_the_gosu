@@ -1,15 +1,28 @@
 require 'gosu'
 require_relative 'game'
+require_relative 'models/board'
+require_relative 'models/space'
+require_relative 'models/room'
 
-class Clue < Gosu::Window
-
+class Clue < Gosu::Window 
+  WIDTH = 2200
+  HEIGHT = 1200
   attr_accessor :height, :width, :fullscreen
-
+  
   def initialize
-    super 2650, 1800, :fullscreen => true
-    self.caption = 'Clue'
-    @image = Gosu::Image.new("board_picture.png")
+    super(WIDTH, HEIGHT)
+    @spaces = []  #
+    @start_scene = :start #
+    self.caption = 'Clue' #
+    # @image = Gosu::Image.new("board_picture.png")
     # @game = Game.new(self)
+  end
+
+  def update #
+    case @start_scene #
+    when @game #
+      update_game # 
+    end
   end
 
   def needs_cursor?
@@ -18,11 +31,12 @@ class Clue < Gosu::Window
 
   def fullscreen?
     @return = [true, false]
-    
   end
 
   def draw
-    @background_image.draw(0, 0, 1)
+    @spaces.each do |space|
+      space.draw
+    end
   end
 end
 

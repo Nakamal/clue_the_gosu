@@ -38,11 +38,11 @@ class Board
             ]
   end
 
-  def terminal_print
-    @grid.each do |row|
-      puts row.map {|space| space.color_print }.join
-    end
-  end
+  # def terminal_print
+  #   @grid.each do |row|
+  #     puts row.map {|space| space.color_print }.join
+  #   end
+  # end
 end
 
-Board.new({}).terminal_print
+# Board.new({}).terminal_print
