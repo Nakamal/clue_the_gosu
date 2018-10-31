@@ -1,17 +1,26 @@
 require 'paint'
 require 'gosu'
 
-SQUARE_WIDTH = 60
+SQUARE_WIDTH = 54
 
-Y_OFFSET = 10
-X_OFFSET = 10
+Y_OFFSET = 65
+X_OFFSET = 90
 
 class Space
 
   attr_accessor :row, :column, :step, :role, :window
 
   def initialize(input_hash)
-    @window = input_hash[:window]
+    @@window ||= input_hash[:window]
+    @window = @@window
+    @@colors ||= {
+                  home: Gosu::Color.argb(0xAA_000088),
+                  room: Gosu::Color.argb(0xAA_008800),
+                  playable: Gosu::Color.argb(0xAA_880088),
+                  non_playable: Gosu::Color.argb(0x00_000000),
+                  door: Gosu::Color.argb(0xAA_888800)
+                  }
+
     @row = input_hash[:row]
     @column = input_hash[:column]
     @role = input_hash[:role] || :playable
@@ -19,11 +28,11 @@ class Space
   end
 
   def starting_x
-    row * SQUARE_WIDTH
+    column * SQUARE_WIDTH + X_OFFSET
   end
 
   def starting_y
-    (column * SQUARE_WIDTH) + Y_OFFSET
+    (row * SQUARE_WIDTH) + Y_OFFSET
   end
 
   def middle_x
@@ -85,7 +94,7 @@ class Space
     y_3 = y_2 + SQUARE_WIDTH - (border * 2)
     x_4 = x_1
     y_4 = y_3
-    c = Gosu::Color.argb(0xff_0000ff)
+    c = @@colors[role]
 
     window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z = 0, mode = :default)
   end
