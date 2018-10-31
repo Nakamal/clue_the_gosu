@@ -10,34 +10,33 @@ class Clue < Gosu::Window
   attr_accessor :height, :width, :fullscreen
   
   def initialize
-    super(WIDTH, HEIGHT)
-    @spaces = []  #
-    @start_scene = :start #
-    self.caption = 'Clue' #
-    # @image = Gosu::Image.new("board_picture.png")
-    # @game = Game.new(self)
+    super(WIDTH, HEIGHT, false)
+    @board = Board.new(window: self)
+    @start_scene = :start 
+    self.caption = 'Clue' 
+    @background = Gosu::Image.new(self, 'board_picture.png')
+    @large_font = Gosu::Font.new(self, "Futura", HEIGHT / 20)
   end
 
-  def update #
-    case @start_scene #
-    when @game #
-      update_game # 
-    end
+  def update 
+    
   end
 
   def needs_cursor?
     true
   end
 
-  def fullscreen?
-    @return = [true, false]
+  def fullscreen? #
+    @fullscreen = [true, false]
   end
 
   def draw
-    @spaces.each do |space|
-      space.draw
-    end
+    @background.draw(0,0,0)
+    @large_font.draw_text("Detective Sheet", 50, 170, 1)
+    # draw_text(170, 650, "Player Info", @large_font, '#008800')
+    @board.draw
   end
+
 end
 
 window = Clue.new

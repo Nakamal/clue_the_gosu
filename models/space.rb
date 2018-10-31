@@ -1,13 +1,14 @@
 require 'paint'
 require 'gosu'
 
-SQUARE_WIDTH = 100
+SQUARE_WIDTH = 60
+
 Y_OFFSET = 10
 X_OFFSET = 10
 
 class Space
 
-  attr_accessor :row, :column, :step, :role
+  attr_accessor :row, :column, :step, :role, :window
 
   def initialize(input_hash)
     @window = input_hash[:window]
@@ -18,19 +19,19 @@ class Space
   end
 
   def starting_x
-    p row * SQUARE_WIDTH
+    row * SQUARE_WIDTH
   end
 
   def starting_y
-    p (column * SQUARE_WIDTH) + Y_OFFSET
+    (column * SQUARE_WIDTH) + Y_OFFSET
   end
 
   def middle_x
-    p starting_x + (SQUARE_WIDTH / 2)
+    starting_x + (SQUARE_WIDTH / 2)
   end
 
   def middle_y
-    p starting_y + (SQUARE_WIDTH / 2)
+    starting_y + (SQUARE_WIDTH / 2)
   end
 
   def label_path(current_step)
@@ -75,7 +76,18 @@ class Space
   end
 
   def draw
-    square = (starting_x + starting_y)
+    border = 2
+    x_1 = starting_x + border
+    y_1 = starting_y + border
+    x_2 = x_1 + SQUARE_WIDTH - (border * 2)
+    y_2 = y_1
+    x_3 = x_2
+    y_3 = y_2 + SQUARE_WIDTH - (border * 2)
+    x_4 = x_1
+    y_4 = y_3
+    c = Gosu::Color.argb(0xff_0000ff)
+
+    window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z = 0, mode = :default)
   end
 
 end
