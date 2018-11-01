@@ -15,28 +15,65 @@ class Clue < Gosu::Window
     @start_scene = :start 
     self.caption = 'Clue' 
     @background = Gosu::Image.new(self, 'final_board.png')
-    @large_font = Gosu::Font.new(self, "Futura", HEIGHT / 20)
+    @font = Gosu::Font.new(self, "Futura", HEIGHT / 20)
   end
 
   def update 
     
   end
 
+  def draw_start  #
+    input = self.text_input.text
+    @message = "Holy Gosu Wadsworth...Clue!"
+  end  #
+
+  def draw_waiting  #
+    
+  end  #
+
+  def draw_game  #
+    
+  end  #
+
+  def draw_win(fate)  #
+    
+  end  #
+
+  def draw_lose(fate)  #
+    
+  end  #
+
+  def button_down_start(id)  #
+    if id == Gosu::KbReturn  #
+      initialize_game  #
+    end  #
+  end  #
+
   def needs_cursor?
     true
   end
 
-  def fullscreen? #
+  def fullscreen? 
     @fullscreen = [true, false]
   end
 
-  def draw
+  def draw  #
+    case @scene  #
+    when :start  #
+      draw_start  #
+    when :waiting  #
+      draw_waiting  #
+    when :game  #
+      draw_game  #
+    when :win  #
+      draw_win  #
+    when :lose  #
+      draw_lose  #
+    end  #
     @background.draw(100,80,0)
-    # @large_font.draw_text("Detective Sheet", 50, 170, 1)
-    # draw_text(170, 650, "Player Info", @large_font, '#008800')
     @board.draw
+    @font.draw("Detective Sheet", 1800, 25, 1)
   end
-
 end
 
 window = Clue.new
