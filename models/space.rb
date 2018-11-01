@@ -1,10 +1,10 @@
 require 'paint'
 require 'gosu'
 
-SQUARE_WIDTH = 54
+SQUARE_WIDTH = 50
 
-Y_OFFSET = 65
-X_OFFSET = 90
+Y_OFFSET = 110
+X_OFFSET = 146
 
 class Space
 
