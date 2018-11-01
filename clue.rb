@@ -14,7 +14,7 @@ class Clue < Gosu::Window
     @board = Board.new(window: self)
     @start_scene = :start 
     self.caption = 'Clue' 
-    @background = Gosu::Image.new(self, 'final_board.png')
+    @background = Gosu::Image.new(self, 'media/final_board.png')
     @font = Gosu::Font.new(self, "Futura", HEIGHT / 20)
   end
 
@@ -36,7 +36,7 @@ class Clue < Gosu::Window
   end  #
 
   def draw_win(fate)  #
-    
+  
   end  #
 
   def draw_lose(fate)  #
