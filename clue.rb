@@ -12,10 +12,12 @@ class Clue < Gosu::Window
   def initialize
     super(WIDTH, HEIGHT, false)
     @board = Board.new(window: self)
-    @start_scene = :start 
+    @draw_start = :start 
     self.caption = 'Clue' 
     @background = Gosu::Image.new(self, 'media/final_board.png')
     @font = Gosu::Font.new(self, "Futura", HEIGHT / 20)
+    # @input = Gosu::Font.new
+    self.text_input = Gosu::TextInput.new
   end
 
   def update 
@@ -23,7 +25,7 @@ class Clue < Gosu::Window
   end
 
   def draw_start  #
-    input = self.text_input.text
+    
     @message = "Holy Gosu Wadsworth...Clue!"
   end  #
 
