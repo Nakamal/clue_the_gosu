@@ -1,5 +1,5 @@
-require 'http'
 require 'gosu'
+require 'http'
 require_relative 'game'
 require_relative 'models/board'
 require_relative 'models/space'
@@ -16,15 +16,15 @@ class Clue < Gosu::Window
     @scene = :start 
     self.caption = 'Clue' 
     @background = Gosu::Image.new(self, 'media/final_board.png')
-    @font = Gosu::Font.new(self, "Futura", HEIGHT / 20)
   
-    @font = Gosu::Font.new(32, name: "Nimbus Mono L") #
+    @font = Gosu::Font.new(self, "Nimbus Mono L", HEIGHT / 30)
+    @font_2 = Gosu::Font.new(self, "Nimbus Mono L", HEIGHT / 5)
     self.text_input = Gosu::TextInput.new
     self.text_input.text = ""
     @last_time = 0
     
-    @game_id = 110 #change this in start scene to current game
-    @participation_id = 171
+    @game_id = 112 #change this in start scene to current game
+    @participation_id = 175
 
     @message = ""
   end
@@ -45,7 +45,9 @@ class Clue < Gosu::Window
   end
 
   def draw_start
-    @font.draw_text("This is the start, press enter", 1800, 200, 1)
+    @font_2.draw_text("Clue", 900, 100, 1)
+    @font.draw_text("Welcome to Hill House", 950, 400, 1)
+    @font.draw_text("Press Enter to begin", 970, 1300, 1)
     @font.draw_text(@message, 1800, 250, 1)
   end 
 
