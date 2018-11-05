@@ -4,6 +4,9 @@ require_relative 'game'
 require_relative 'models/board'
 require_relative 'models/space'
 require_relative 'models/room'
+require_relative 'models/button'
+
+BASE_ROOT_URL = "http://localhost:3000"
 
 class Clue < Gosu::Window 
   WIDTH = 2400
@@ -22,17 +25,46 @@ class Clue < Gosu::Window
     self.text_input = Gosu::TextInput.new
     self.text_input.text = ""
     @last_time = 0
-    
-    @game_id = 112 #change this in start scene to current game
-    @participation_id = 175
-
+    @characters = []
     @message = ""
+    initialize_start
+  end
+    
+  def initialize_start   
+    @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
+  end
+
+  def initialize_character_selecting
+    parsed_response = HTTP.get("http://localhost:3000/api/games/#{@current_game_id}").parse
+    @available_characters = []
+    character_starting_line = 355
+    parsed_response["available_characters"].each_with_index do |character, index|
+      @available_characters << Button.new(window: self, x: 1200, y: character_starting_line + (130 * index), text: character["name"], id: character["id"])
+    end
+  end
+
+  def initialize_waiting
+    # response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}")
+    # @character_name = response.parse[]
+  end
+
+  def update 
+    case @scene
+    when :start
+      update_start
+    when :character_selecting
+      update_character_selecting
+    when :waiting
+      update_waiting
+    end
   end
 
   def draw
     case @scene
     when :start
       draw_start
+    when :character_selecting
+      draw_character_selecting
     when :waiting
       draw_waiting
     when :game
@@ -42,19 +74,55 @@ class Clue < Gosu::Window
     when :lose
       draw_lose
     end 
+
+    @font.draw_text("X: #{mouse_x.round(0)}", 2000, 50, 1) # remove once you have the visuals in place
+    @font.draw_text("Y: #{mouse_y.round(0)}", 2200, 50, 1) # remove once you have the visuals in place
+  end
+
+  def update_start
+    if self.text_input.text == ""
+      @new_game_button.text = "New Game"
+    else
+      @new_game_button.text = "Join Game"
+    end
   end
 
   def draw_start
     @font_2.draw_text("Clue", 900, 100, 1)
     @font.draw_text("Welcome to Hill House", 950, 400, 1)
     @font.draw_text("Press Enter to begin", 970, 1300, 1)
-    @font.draw_text(@message, 1800, 250, 1)
+
+    @font.draw_text(self.text_input.text, 1155, 700, 1)
+    @new_game_button.draw
   end 
 
-  def draw_waiting 
-    @font.draw_text("waiting", 1800, 200, 1)
-    @font.draw_text(self.text_input.text, 1800, 100, 1)
+  def update_character_selecting
+
+  end
+
+  def draw_character_selecting
+    @font.draw_text("Choose your Character", 950, 200, 1)
+    @available_characters.each {|character_button| character_button.draw }
+    @font.draw_text("Player ID:   #{self.text_input.text}", 70, 200, 1)
+    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
+    
     @font.draw_text(@message, 1800, 250, 1)
+  end
+
+  def update_waiting
+    if (Gosu::milliseconds - @last_time) / 10000 == 1
+      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      @scene = :game if response.parse["my_turn"]
+        
+      @last_time = Gosu::milliseconds()
+    end
+  end
+
+  def draw_waiting 
+    @font.draw_text("waiting", 1050, 100, 1)
+    @font.draw_text("Player Name: #{@player_name}", 1050, 250, 1)
+    @font.draw_text("Character Name: #{@character_name}", 1050, 400, 1)
+    @font.draw_text(@message, 1050, 400, 1)
   end 
 
   def draw_game 
@@ -71,40 +139,60 @@ class Clue < Gosu::Window
     
   end
 
-  def update 
-    case @scene
-    when :waiting
-      update_waiting
-    end
-  end
-
-  def update_waiting
-    if (Gosu::milliseconds - @last_time) / 10000 == 1
-      response = HTTP.get("http://localhost:3000/api/participations/#{@participation_id}/turn_check")
-      if response.parse["my_turn"]
-        @scene = :game
-      end
-      @last_time = Gosu::milliseconds()
-    end
-  end
-
   def button_down(id)
     case @scene
     when :start
       button_down_start(id)
+    when :character_selecting
+      character_selecting(id)
     when :waiting
       button_down_waiting(id)
     end
   end
 
   def button_down_start(id) 
-    if id == 40
-      response = HTTP.get("http://localhost:3000/api/characters")
-      @message = response.parse.first["name"]
-      @scene = :waiting
+    if (id == Gosu::MsLeft) && (mouse_x - @new_game_button.x).abs < (@new_game_button.width / 2) && (mouse_y - @new_game_button.y).abs < (@new_game_button.height / 2)
+      if self.text_input.text == ""
+        @current_game_id = HTTP.post("http://localhost:3000/api/games").parse["id"]
+      else
+        @current_game_id = self.text_input.text.to_i
+        self.text_input.text = ""
+      end
+
+      puts "You are now playing game number: #{@current_game_id}"
+      @scene = :character_selecting
+      initialize_character_selecting
     end
   end  
 
+  def character_selecting(id)
+    if (id == Gosu::MsLeft) 
+      puts "clicked"
+      if [1,2,3].include?(self.text_input.text.to_i)
+        @available_characters.each do |character_button|
+          if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
+            puts character_button.text
+            puts "button clicked"
+            parsed_response = HTTP.post("http://localhost:3000/api/games/#{@current_game_id}/participations?character_id=#{character_button.id}&player_id=#{self.text_input.text}").parse
+
+            if parsed_response["move_forward"]
+              @player_name = parsed_response["player"]["username"]
+              @character_name = parsed_response["character"]["name"] #change to gosu logic, may need to make player/character objects on all computers
+              @participation_id = parsed_response["id"]
+              self.text_input.text = ""
+              initialize_waiting
+              @scene = :waiting
+            else
+              initialize_character_selecting
+            end
+          end
+        end
+      end
+    end
+    # if id == 40
+    #   @scene = :waiting
+    # end
+  end
 
   def button_down_waiting(id)  
     if id == 40
