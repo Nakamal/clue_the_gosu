@@ -1,6 +1,6 @@
 require 'gosu'
 
-class Room
+class Character
   def initialize
     
   end

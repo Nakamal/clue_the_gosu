@@ -1,6 +1,6 @@
 require 'gosu'
 
-class Room
+class Card
   def initialize
     
   end

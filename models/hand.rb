@@ -1,6 +1,7 @@
 require 'gosu'
+require_relative 'card'
 
-class Room
+class Hand
   def initialize
     
   end
