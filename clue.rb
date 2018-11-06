@@ -142,6 +142,15 @@ class Clue < Gosu::Window
     @font.draw_text("Detective Sheet", 1800, 100, 1)
   end 
 
+  def update_game_waiting
+    if (Gosu::milliseconds - @last_time) / 10000 == 1
+      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      @scene = :game if response.parse["my_turn"]
+        
+      @last_time = Gosu::milliseconds()
+    end
+  end
+
   def draw_game_waiting
     
   end
