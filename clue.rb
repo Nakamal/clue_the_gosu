@@ -183,6 +183,7 @@ class Clue < Gosu::Window
     @board.draw
     @font.draw_text("Detective Sheet", 1800, 100, 1)
     if my_player.my_turn
+      @detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet")
       @font.draw_text("What room would you like to go to?", 1600, 200, 1)
       @available_rooms.each {|room_button| room_button.draw }
       "======================================================="
@@ -251,7 +252,7 @@ class Clue < Gosu::Window
 
             if parsed_response["move_forward"]
               @player_name = parsed_response["player"]["username"]
-              @character_name = parsed_response["character"]["name"] #change to gosu logic, may need to make player/character objects on all computers
+              @character_name = parsed_response["character"]["name"]
               @my_player_id = parsed_response["player"]["id"]
               @participation_id = parsed_response["id"]
 
@@ -289,6 +290,24 @@ class Clue < Gosu::Window
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
         if parsed_response["move_forward"]
           @current_location = parsed_response["new_location"]
+        end
+      end
+    end
+    @suggestion_button
+      if (mouse_x - suggestion_button.x).abs < (suggestion_button.width / 2) && (mouse_y - suggestion_button.y).abs < (suggestion_button.height / 2)
+        puts suggestion_button.text
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        if parsed_response["move_forward"]
+          @suggestion = parsed_response["suggestion"]
+        end
+      end
+    end
+    @accusation_button
+      if (mouse_x - accusation_button.x).abs < (accusation_button.width / 2) && (mouse_y - accusation_button.y).abs < (accusation_button.height / 2)
+        puts accusation_button.text
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        if parsed_response["move_forward"]
+          @accusation = parsed_response["accusation"]
         end
       end
     end
