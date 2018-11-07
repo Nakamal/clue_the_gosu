@@ -58,7 +58,6 @@ class Clue < Gosu::Window
   end
 
   def initialize_game_waiting
-    puts "in game waiting: #{@game_organizer ? "game_organizer" : "stooge"}"
     @last_time = Gosu::milliseconds
   end
 
@@ -185,6 +184,13 @@ class Clue < Gosu::Window
     @font.draw_text("Detective Sheet", 1800, 100, 1)
     if my_player.my_turn
       @font.draw_text("What room would you like to go to?", 1600, 200, 1)
+      @available_rooms.each {|room_button| room_button.draw }
+      "======================================================="
+      @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, 1)
+      @available_characters.each {|character_button| character_button.draw }
+      "======================================================="
+      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, 1)
+      @available_weapons.each {|weapon_button| weapon_button.draw }
     end
   end 
 
@@ -277,7 +283,33 @@ class Clue < Gosu::Window
   end
 
   def button_down_game(id)
-      
+    @available_rooms.each do |room_button|
+      if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
+        puts room_button.text
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        if parsed_response["move_forward"]
+          @current_location = parsed_response["new_location"]
+        end
+      end
+    end
+    @available_weapons.each do |weapon_button|
+      if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
+        puts weapon_button.text
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        if parsed_response["move_forward"]
+          @weapon_object = parsed_response["weapon"].name
+        end
+      end
+    end
+    @available_characters.each do |character_button|
+      if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
+        puts character_button.text
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        if parsed_response["move_forward"]
+          @weapon_object = parsed_response["weapon"].name  
+        end
+      end
+    end
   end  
 
   def needs_cursor?
