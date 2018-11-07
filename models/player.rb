@@ -1,11 +1,15 @@
 require 'gosu'
+require_relative 'character'
 
 class Player
-  def initialize(player_options_hash, character_options_hash)
+  attr_accessor :current_player, :id, :username, :character, :participation_id, :my_turn
+  def initialize(options_hash)
     @current_player = false
-    @id = player_options_hash["id"]
-    @username = player_options_hash["username"]
-    @character = Character.new(character_options_hash)
+    @id = options_hash["player"]["id"]
+    @username = options_hash["player"]["username"]
+    @character = Character.new(options_hash["character"])
+    @participation_id = options_hash["id"]
+    @my_turn = options_hash["my_turn"]
   end
 
 

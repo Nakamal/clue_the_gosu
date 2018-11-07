@@ -53,6 +53,11 @@ class Clue < Gosu::Window
 
   def initialize_waiting
     @start_game_button = Button.new(window: self, x: 1200, y: 847, text: "Start Game")
+    @players = []
+  end
+
+  def initialize_game
+    
   end
 
   def update 
@@ -129,7 +134,11 @@ class Clue < Gosu::Window
   def update_waiting
     if (Gosu::milliseconds - @last_time) / 10000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @scene = :game if response.parse["my_turn"]
+      @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash) }
+      if response.parse["game_start"]
+        @scene = :game 
+        initialize_game
+      end
         
       @last_time = Gosu::milliseconds()
     end
@@ -158,19 +167,12 @@ class Clue < Gosu::Window
   end 
 
   def update_game_waiting
-    parsed_response = HTTP.post("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/participations?character_id=#{character_button.id}&player_id=#{self.text_input.text}").parse
-
-    if parsed_response["move_forward"]
-      @player_name = parsed_response["player"]["username"]
-      @character_name = parsed_response["character"]["name"] #change to gosu logic, may need to make player/character objects on all computers
-      @participation_id = parsed_response["id"]
-      self.text_input.text = ""
-      if (Gosu::milliseconds - @last_time) / 10000 == 1
-        response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-        @scene = :game if response.parse["my_turn"]
-        
-        @last_time = Gosu::milliseconds()
-      end
+    # parsed_response = HTTP.post("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/participations?character_id=#{}&player_id=#{self.text_input.text}").parse
+    if (Gosu::milliseconds - @last_time) / 10000 == 1
+      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      @scene = :game if response.parse["my_turn"]
+      
+      @last_time = Gosu::milliseconds()
     end
   end
 
@@ -199,7 +201,7 @@ class Clue < Gosu::Window
     when :start
       button_down_start(id)
     when :character_selecting
-      character_selecting(id)
+      button_down_character_selecting(id)
     when :waiting
       button_down_waiting(id)
     when :game
@@ -225,7 +227,7 @@ class Clue < Gosu::Window
     end
   end  
 
-  def character_selecting(id)
+  def button_down_character_selecting(id)
     if (id == Gosu::MsLeft) 
       if [1,2,3,4,5,6,7].include?(self.text_input.text.to_i)
         @available_characters.each do |character_button|
@@ -236,7 +238,8 @@ class Clue < Gosu::Window
             if parsed_response["move_forward"]
               @player_name = parsed_response["player"]["username"]
               @character_name = parsed_response["character"]["name"] #change to gosu logic, may need to make player/character objects on all computers
-              @participation_id = parsed_response["id"]
+              @my_player = Player.new(parsed_response)
+
               self.text_input.text = ""
               initialize_waiting
               @scene = :waiting
@@ -252,7 +255,7 @@ class Clue < Gosu::Window
   def button_down_waiting(id)
     id = Gosu::MsLeft
     if (id == Gosu::MsLeft) && (mouse_x - @start_game_button.x).abs < (@start_game_button.width / 2) && (mouse_y - @start_game_button.y).abs < (@start_game_button.height / 2)
-     @scene = :game
+     @scene = :game_waiting
     end  
   end
 
