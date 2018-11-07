@@ -62,7 +62,9 @@ class Clue < Gosu::Window
   end
 
   def initialize_game
-    
+    @choosen_room = nil
+    @choosen_weapon = nil
+    @choosen_character = nil
   end
 
   def update 
@@ -287,45 +289,58 @@ class Clue < Gosu::Window
     @available_rooms.each do |room_button|
       if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
         puts room_button.text
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-        if parsed_response["move_forward"]
-          @current_location = parsed_response["new_location"]
-        end
+        @choosen_room = room_button.text
+        # parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        # if parsed_response["move_forward"]
+        #   @current_location = parsed_response["new_location"]
+        # end
       end
     end
-    @suggestion_button
-      if (mouse_x - suggestion_button.x).abs < (suggestion_button.width / 2) && (mouse_y - suggestion_button.y).abs < (suggestion_button.height / 2)
-        puts suggestion_button.text
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-        if parsed_response["move_forward"]
-          @suggestion = parsed_response["suggestion"]
-        end
-      end
-    end
-    @accusation_button
-      if (mouse_x - accusation_button.x).abs < (accusation_button.width / 2) && (mouse_y - accusation_button.y).abs < (accusation_button.height / 2)
-        puts accusation_button.text
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-        if parsed_response["move_forward"]
-          @accusation = parsed_response["accusation"]
-        end
-      end
-    end
+
     @available_weapons.each do |weapon_button|
       if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
         puts weapon_button.text
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-        if parsed_response["move_forward"]
-          @weapon_object = parsed_response["weapon"].name
-        end
+        @choosen_weapon = weapon_button.text
+        # parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        # if parsed_response["move_forward"]
+        #   @weapon_object = parsed_response["weapon"].name
+        # end
       end
     end
+
     @available_characters.each do |character_button|
       if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
         puts character_button.text
+        @choosen_character = character_button.text
+        # parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        # if parsed_response["move_forward"]
+        #   @weapon_object = parsed_response["weapon"].name  
+        # end
+      end
+    end
+
+    if @choosen_room && @choosen_character && @choosen_weapon
+      if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
+        puts @suggestion_button.text
+        # send params
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
         if parsed_response["move_forward"]
-          @weapon_object = parsed_response["weapon"].name  
+          @suggestion = parsed_response["suggestion"]
+          @choosen_room = nil
+          @choosen_weapon = nil
+          @choosen_character = nil
+        end
+      end
+
+
+      if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
+        puts @accusation_button.text
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+        if parsed_response["move_forward"]
+          @accusation = parsed_response["accusation"]
+          @choosen_room = nil
+          @choosen_weapon = nil
+          @choosen_character = nil
         end
       end
     end
