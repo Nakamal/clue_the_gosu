@@ -54,6 +54,12 @@ class Clue < Gosu::Window
   def initialize_waiting
     @start_game_button = Button.new(window: self, x: 1200, y: 847, text: "Start Game")
     @players = []
+    @last_time = Gosu::milliseconds
+  end
+
+  def initialize_game_waiting
+    puts "in game waiting: #{@game_organizer ? "game_organizer" : "stooge"}"
+    @last_time = Gosu::milliseconds
   end
 
   def initialize_game
@@ -68,10 +74,10 @@ class Clue < Gosu::Window
       update_character_selecting
     when :waiting
       update_waiting
-    when :game
-      update_game
     when :game_waiting
       update_game_waiting
+    when :game
+      update_game
     when :win
       update_win
     when :lose
@@ -87,10 +93,10 @@ class Clue < Gosu::Window
       draw_character_selecting
     when :waiting
       draw_waiting
-    when :game
-      draw_game
     when :game_waiting
       draw_game_waiting
+    when :game
+      draw_game
     when :win
       draw_win
     when :lose
@@ -134,13 +140,16 @@ class Clue < Gosu::Window
   def update_waiting
     if (Gosu::milliseconds - @last_time) / 10000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      p "participation_id:  #{@participation_id}"
+      p response.parse["participations"].any?
+      p response.parse["game_started"]
+      puts "*" * 50
       @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash) }
-      if response.parse["game_start"]
-        @scene = :game 
-        initialize_game
+      if response.parse["game_started"]
+        @scene = :game_waiting
+        initialize_game_waiting
       end
-        
-      @last_time = Gosu::milliseconds()
+      @last_time = Gosu::milliseconds
     end
   end
 
@@ -150,11 +159,21 @@ class Clue < Gosu::Window
     @font.draw_text("Character Name: #{@character_name}", 1050, 400, 1)
     @font.draw_text(@message, 1050, 400, 1)
     @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
-
-    if @game_organizer == true
-      @start_game_button.draw
-    end
+    @start_game_button.draw if @game_organizer == true
   end 
+
+  def update_game_waiting
+    if (Gosu::milliseconds - @last_time) / 10000 == 1
+      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash) }
+      @scene = :game if response.parse["my_turn"]
+      @last_time = Gosu::milliseconds()
+    end
+  end
+
+  def draw_game_waiting
+    @font.draw_text("And now you play, the waiting game...", 840, 400, 1)
+  end
 
   def update_game
     
@@ -164,21 +183,10 @@ class Clue < Gosu::Window
     @background.draw(100,80,0)
     @board.draw
     @font.draw_text("Detective Sheet", 1800, 100, 1)
-  end 
-
-  def update_game_waiting
-    # parsed_response = HTTP.post("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/participations?character_id=#{}&player_id=#{self.text_input.text}").parse
-    if (Gosu::milliseconds - @last_time) / 10000 == 1
-      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @scene = :game if response.parse["my_turn"]
-      
-      @last_time = Gosu::milliseconds()
+    if my_player.my_turn
+      @font.draw_text("What room would you like to go to?", 1600, 200, 1)
     end
-  end
-
-  def draw_game_waiting
-    
-  end
+  end 
 
   def update_win
     
@@ -238,7 +246,8 @@ class Clue < Gosu::Window
             if parsed_response["move_forward"]
               @player_name = parsed_response["player"]["username"]
               @character_name = parsed_response["character"]["name"] #change to gosu logic, may need to make player/character objects on all computers
-              @my_player = Player.new(parsed_response)
+              @my_player_id = parsed_response["player"]["id"]
+              @participation_id = parsed_response["id"]
 
               self.text_input.text = ""
               initialize_waiting
@@ -253,19 +262,23 @@ class Clue < Gosu::Window
   end
 
   def button_down_waiting(id)
-    id = Gosu::MsLeft
-    if (id == Gosu::MsLeft) && (mouse_x - @start_game_button.x).abs < (@start_game_button.width / 2) && (mouse_y - @start_game_button.y).abs < (@start_game_button.height / 2)
-     @scene = :game_waiting
+    if @game_organizer && (id == Gosu::MsLeft) && (mouse_x - @start_game_button.x).abs < (@start_game_button.width / 2) && (mouse_y - @start_game_button.y).abs < (@start_game_button.height / 2)
+      response = HTTP.patch("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/start")
+
+      if response.parse["start_game"] == "true"
+        @scene = :game_waiting
+        initialize_game_waiting
+      end
     end  
+  end
+
+  def button_down_game_waiting(id)
+    
   end
 
   def button_down_game(id)
       
   end  
-
-  def button_down_game_waiting(id)
-    
-  end
 
   def needs_cursor?
     true
@@ -273,6 +286,10 @@ class Clue < Gosu::Window
 
   def fullscreen? 
     @fullscreen = [true, false]
+  end
+
+  def my_player
+    @players.select {|player| player.id == @my_player_id }.first
   end
 end
 
