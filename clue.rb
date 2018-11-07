@@ -5,6 +5,13 @@ require_relative 'models/board'
 require_relative 'models/space'
 require_relative 'models/room'
 require_relative 'models/button'
+require_relative 'models/card'
+require_relative 'models/character'
+require_relative 'models/detective_sheet'
+require_relative 'models/die'
+require_relative 'models/hand'
+require_relative 'models/player'
+require_relative 'models/weapon'
 
 BASE_ROOT_URL = "http://localhost:3000"
 
@@ -58,6 +65,12 @@ class Clue < Gosu::Window
       update_waiting
     when :game
       update_game
+    when :game_waiting
+      update_game_waiting
+    when :win
+      update_win
+    when :lose
+      update_lose
     end
   end
 
@@ -71,6 +84,8 @@ class Clue < Gosu::Window
       draw_waiting
     when :game
       draw_game
+    when :game_waiting
+      draw_game_waiting
     when :win
       draw_win
     when :lose
@@ -143,11 +158,19 @@ class Clue < Gosu::Window
   end 
 
   def update_game_waiting
-    if (Gosu::milliseconds - @last_time) / 10000 == 1
-      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @scene = :game if response.parse["my_turn"]
+    parsed_response = HTTP.post("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/participations?character_id=#{character_button.id}&player_id=#{self.text_input.text}").parse
+
+    if parsed_response["move_forward"]
+      @player_name = parsed_response["player"]["username"]
+      @character_name = parsed_response["character"]["name"] #change to gosu logic, may need to make player/character objects on all computers
+      @participation_id = parsed_response["id"]
+      self.text_input.text = ""
+      if (Gosu::milliseconds - @last_time) / 10000 == 1
+        response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+        @scene = :game if response.parse["my_turn"]
         
-      @last_time = Gosu::milliseconds()
+        @last_time = Gosu::milliseconds()
+      end
     end
   end
 
@@ -155,9 +178,17 @@ class Clue < Gosu::Window
     
   end
 
+  def update_win
+    
+  end
+
   def draw_win(fate)
   
   end 
+
+  def update_lose
+    
+  end
 
   def draw_lose(fate)
     
@@ -173,6 +204,8 @@ class Clue < Gosu::Window
       button_down_waiting(id)
     when :game
       button_down_game(id)
+    when :game_waiting
+      button_down_game_waiting(id)
     end
   end
 
@@ -226,6 +259,10 @@ class Clue < Gosu::Window
   def button_down_game(id)
       
   end  
+
+  def button_down_game_waiting(id)
+    
+  end
 
   def needs_cursor?
     true
