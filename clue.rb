@@ -140,12 +140,8 @@ class Clue < Gosu::Window
   end
 
   def update_waiting
-    if (Gosu::milliseconds - @last_time) / 10000 == 1
+    if (Gosu::milliseconds - @last_time) / 1000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      p "participation_id:  #{@participation_id}"
-      p response.parse["participations"].any?
-      p response.parse["game_started"]
-      puts "*" * 50
       @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash) }
       if response.parse["game_started"]
         @scene = :game_waiting
@@ -165,7 +161,7 @@ class Clue < Gosu::Window
   end 
 
   def update_game_waiting
-    if (Gosu::milliseconds - @last_time) / 10000 == 1
+    if (Gosu::milliseconds - @last_time) / 1000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
       @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash) }
       @scene = :game if response.parse["my_turn"]
@@ -187,7 +183,7 @@ class Clue < Gosu::Window
     #what z axis is the board on?
     @board.draw
 
-    case @game_buttons_set
+    case @game_button_set
     when :game_waiting
       @shield.draw(2200,1200,2)
     when :character_buttons
@@ -298,12 +294,13 @@ class Clue < Gosu::Window
   def button_down_game_waiting(id)
     
   end
-
+    #set the instance variable for available_rooms, availalable_weapons and double check the available characters
   def button_down_game(id)
     @available_rooms.each do |room_button|
       if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
         puts room_button.text
         @choosen_room = room_button.text
+        @game_button_set = :room_buttons
       end
     end
 
@@ -311,6 +308,8 @@ class Clue < Gosu::Window
       if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
         puts weapon_button.text
         @choosen_weapon = weapon_button.text
+        @game_button_set = :weapon_buttons
+
       end
     end
 
@@ -318,6 +317,8 @@ class Clue < Gosu::Window
       if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
         puts character_button.text
         @choosen_character = character_button.text
+        @game_button_set = :character_buttons
+
       end
     end
 
