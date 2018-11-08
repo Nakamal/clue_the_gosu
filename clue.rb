@@ -184,6 +184,7 @@ class Clue < Gosu::Window
 
   def draw_game 
     @background.draw(100,80,0)
+    #what z axis is the board on?
     @board.draw
 
     case @game_buttons_set
