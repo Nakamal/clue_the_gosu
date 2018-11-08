@@ -36,12 +36,6 @@ class Board
             ]
   end
 
-  # def terminal_print
-  #   @grid.each do |row|
-  #     puts row.map {|space| space.color_print }.join
-  #   end
-  # end
-
   def draw
     @grid.each do |row|
       row.each do |space|
