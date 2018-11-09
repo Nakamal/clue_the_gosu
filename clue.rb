@@ -1,16 +1,19 @@
 require 'gosu'
 require 'http'
+
 require_relative 'game'
 require_relative 'models/board'
-require_relative 'models/space'
-require_relative 'models/room'
 require_relative 'models/button'
 require_relative 'models/card'
 require_relative 'models/character'
+require_relative 'models/detective_info'
 require_relative 'models/detective_sheet'
 require_relative 'models/die'
 require_relative 'models/hand'
 require_relative 'models/player'
+require_relative 'models/pop_up_window'
+require_relative 'models/room'
+require_relative 'models/space'
 require_relative 'models/weapon'
 
 BASE_ROOT_URL = "http://localhost:3000"
@@ -18,7 +21,7 @@ BASE_ROOT_URL = "http://localhost:3000"
 class Clue < Gosu::Window 
   WIDTH = 2400
   HEIGHT = 1400
-  attr_accessor :height, :width, :fullscreen, :id
+  attr_accessor :fullscreen, :id
   
   # MAIN SETUP ************************************************************
 
@@ -246,7 +249,7 @@ class Clue < Gosu::Window
   def draw_game_waiting
     @background.draw(100,80,0)
     @board.draw
-    @font.draw_text("And now you play, the waiting game...", 420, 180, 30)
+    @font.draw_text("And now you play, the waiting game...", 400, 180, 30)
     @font.draw_text("Detective Sheet", 1600, 100, 50)
     background_c = Gosu::Color.argb(0x88_000000)
     self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 20, mode = :default)
@@ -265,10 +268,11 @@ class Clue < Gosu::Window
     @game_button_set = :none
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
     @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
+    @pop_up = PopUpWindow.new(window: self)
 
-    @available_rooms = Room.buttons(self)
-    @available_weapons = Weapon.buttons(self)
-    @available_characters = Character.buttons(self)  
+    @room_buttons = Room.buttons(self)
+    @weapon_buttons = Weapon.buttons(self)
+    @character_buttons = Character.buttons(self)  
   end
 
   def update_game
@@ -281,88 +285,57 @@ class Clue < Gosu::Window
     @font.draw_text("Detective Sheet", 1600, 100, 50)
     @detective_sheet.draw
     z = 10
+
     case @game_button_set
+
     when :room_buttons
-      border = 2
-      x_1 = x
-      y_1 = y + border
-      x_2 = x_1 + width
-      y_2 = y_1
-      x_3 = x_2
-      y_3 = y_2 + height - (border * 2)
-      x_4 = x_1
-      y_4 = y_3
-      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
-
-      @font.draw_text("What room would you like to go to?", 1600, 200, z + 1)
+      @pop_up.draw
+      @font.draw_text("What room would you like to go to?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
       @room_buttons.each { |room_button| room_button.draw }
-    when :decision_buttons
-      border = 2
-      x_1 = x
-      y_1 = y + border
-      x_2 = x_1 + width
-      y_2 = y_1
-      x_3 = x_2
-      y_3 = y_2 + height - (border * 2)
-      x_4 = x_1
-      y_4 = y_3
-      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-      @font.draw_text("Are you making a suggestion or an accusation?", 350, 170, z + 1)
-      @suggestion_button.draw
-      @accusation_button.draw
     when :character_buttons
-      border = 2
-      x_1 = x
-      y_1 = y + border
-      x_2 = x_1 + width
-      y_2 = y_1
-      x_3 = x_2
-      y_3 = y_2 + height - (border * 2)
-      x_4 = x_1
-      y_4 = y_3
-      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
-
-      @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, z + 1)
+      @pop_up.draw
+      @font.draw_text("Which shifty suspect do you think committed this heinous act?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
       @character_buttons.each { |character_button| character_button.draw }
-    when :weapon_buttons
-      border = 2
-      x_1 = x
-      y_1 = y + border
-      x_2 = x_1 + width
-      y_2 = y_1
-      x_3 = x_2
-      y_3 = y_2 + height - (border * 2)
-      x_4 = x_1
-      y_4 = y_3
-      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, z + 1)
+    when :weapon_buttons
+      @pop_up.draw
+      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
       @weapon_buttons.each { |weapon_button| weapon_button.draw }
+
+    when :decision_buttons
+      @pop_up.draw
+      @font.draw_text("Are you making a suggestion or an accusation?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
+      # @suggestion_button.draw
+      # @accusation_button.draw
     end 
   end 
 
   def button_down_game(id)
-    @available_rooms.each do |room_button|
+    if @game_button_set == :none && id == 40
+      @game_button_set = :room_buttons
+    end
+
+    @room_buttons.each do |room_button|
       if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
         puts room_button.text
         @choosen_room = room_button.text
-        @game_button_set = :room_buttons
+        @game_button_set = :character_buttons
       end
     end
 
-    @available_weapons.each do |weapon_button|
-      if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
-        puts weapon_button.text
-        @choosen_weapon = weapon_button.text
+    @character_buttons.each do |character_button|
+      if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
+        puts character_button.text
         @game_button_set = :weapon_buttons
       end
     end
 
-    @available_characters.each do |character_button|
-      if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
-        puts character_button.text
-        @game_button_set = :character_buttons
+    @weapon_buttons.each do |weapon_button|
+      if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
+        puts weapon_button.text
+        @choosen_weapon = weapon_button.text
+        @game_button_set = :decision_buttons
       end
     end
 
