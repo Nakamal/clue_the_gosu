@@ -35,11 +35,18 @@ class Clue < Gosu::Window
     @characters = []
     @message = ""
     initialize_start
-    @game_organizer = false
+    @game_organizer = false 
   end
     
   def initialize_start   
     @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
+
+
+    # testing =========================================
+    # detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/302/sheet").parse
+    # @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
+    # testing =========================================
+
   end
 
   def initialize_character_selecting
@@ -59,6 +66,7 @@ class Clue < Gosu::Window
 
   def initialize_game_waiting
     @last_time = Gosu::milliseconds
+    initialize_game
   end
 
   def initialize_game
@@ -66,6 +74,12 @@ class Clue < Gosu::Window
     @choosen_weapon = nil
     @choosen_character = nil
     @game_button_set = :none
+    detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
+    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
+
+    @available_rooms = Room.buttons(self)
+    @available_weapons = Weapon.buttons(self)
+    @available_characters = Character.buttons(self)  
   end
 
   def update 
@@ -124,6 +138,11 @@ class Clue < Gosu::Window
 
     @font.draw_text(self.text_input.text, 1155, 700, 1)
     @new_game_button.draw
+
+    # testing ================================
+    # @detective_sheet.draw
+    # testing ================================
+
   end 
 
   def update_character_selecting
@@ -170,7 +189,12 @@ class Clue < Gosu::Window
   end
 
   def draw_game_waiting
-    @font.draw_text("And now you play, the waiting game...", 840, 400, 1)
+    @background.draw(100,80,0)
+    @board.draw
+    @font.draw_text("And now you play, the waiting game...", 840, 400, 3)
+    @font.draw_text("Detective Sheet", 1800, 100, 3)
+    background_c = Gosu::Color.argb(0x88_000000)
+    self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 2, mode = :default)
   end
 
   def update_game
@@ -180,30 +204,24 @@ class Clue < Gosu::Window
 
   def draw_game 
     @background.draw(100,80,0)
-    #what z axis is the board on?
     @board.draw
+    @detective_sheet.draw
 
     case @game_button_set
-    when :game_waiting
-      @shield.draw(2200,1200,2)
     when :character_buttons
-      @shield.draw(2200,1200,2)
       @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, 3)
       @character_buttons.each { |character_button| character_button.draw }
     when :weapon_buttons
-      @shield.draw(2200,1200,2)
       @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, 3)
       @weapon_buttons.each { |weapon_button| weapon_button.draw }
     when :room_buttons
-      @shield.draw(2200,1200,2)
       @font.draw_text("What room would you like to go to?", 1600, 200, 3)
       @room_buttons.each { |room_button| room_button.draw }
     else
     end # incomplete 
 
-    @font.draw_text("Detective Sheet", 1800, 100, 3)
     if my_player.my_turn
-      @detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet")
+      # @detective_sheet_info.draw_text("Hand: ", 1800, 200, 3)
     end
   end 
 
@@ -294,7 +312,7 @@ class Clue < Gosu::Window
   def button_down_game_waiting(id)
     
   end
-    #set the instance variable for available_rooms, availalable_weapons and double check the available characters
+    #define the instance variable for available_rooms, availalable_weapons and double check the available characters
   def button_down_game(id)
     @available_rooms.each do |room_button|
       if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
@@ -309,22 +327,19 @@ class Clue < Gosu::Window
         puts weapon_button.text
         @choosen_weapon = weapon_button.text
         @game_button_set = :weapon_buttons
-
       end
     end
 
     @available_characters.each do |character_button|
       if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
         puts character_button.text
-        @choosen_character = character_button.text
         @game_button_set = :character_buttons
-
       end
     end
 
     if @choosen_room && @choosen_character && @choosen_weapon
       if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
-        puts @suggestion_button.text
+        @suggestion_button.text
         # send params
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
         if parsed_response["move_forward"]
@@ -337,7 +352,7 @@ class Clue < Gosu::Window
 
 
       if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
-        puts @accusation_button.text
+        @accusation_button.text
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
         if parsed_response["move_forward"]
           @accusation = parsed_response["accusation"]
