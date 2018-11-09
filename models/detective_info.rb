@@ -16,6 +16,7 @@ class DetectiveInfo
   end
 
   def draw
+    z = 50
     border = 2
     x_1 = x
     y_1 = y + border
@@ -33,14 +34,14 @@ class DetectiveInfo
     else
       c = Gosu::Color.argb(0xaa_883300)
     end
-    window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, 4, mode = :default)
+    window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
     if header_message
-      @font.draw_text(@header_message, x + 30, y + 13, 5)
+      @font.draw_text(@header_message, x + 30, y + 13, z + 1)
     else
-      @font.draw_text(status, x + 30, y + 13, 5)
-      @font.draw_text(name, x + 70, y + 13, 5)
-      window.draw_line(x + 50, y, Gosu::Color.argb(0xff_000000), x + 50, y + height, Gosu::Color.argb(0xff_000000), 6, mode = :default)
+      @font.draw_text(status, x + 30, y + 13, z + 1)
+      @font.draw_text(name, x + 70, y + 13, z + 1)
+      window.draw_line(x + 50, y, Gosu::Color.argb(0xff_000000), x + 50, y + height, Gosu::Color.argb(0xff_000000), z + 1, mode = :default)
     end
   end
 end

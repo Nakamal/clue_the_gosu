@@ -101,6 +101,7 @@ class Clue < Gosu::Window
   def initialize_start   
     @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
   end
+
   def update_start
     if self.text_input.text == ""
       @new_game_button.text = "New Game"
@@ -116,11 +117,6 @@ class Clue < Gosu::Window
 
     @font.draw_text(self.text_input.text, 1155, 700, 1)
     @new_game_button.draw
-
-    # testing ================================
-    # @detective_sheet.draw
-    # testing ================================
-
   end 
 
   def button_down_start(id) 
@@ -250,10 +246,10 @@ class Clue < Gosu::Window
   def draw_game_waiting
     @background.draw(100,80,0)
     @board.draw
-    @font.draw_text("And now you play, the waiting game...", 840, 400, 3)
-    @font.draw_text("Detective Sheet", 1600, 100, 3)
+    @font.draw_text("And now you play, the waiting game...", 420, 180, 30)
+    @font.draw_text("Detective Sheet", 1600, 100, 50)
     background_c = Gosu::Color.argb(0x88_000000)
-    self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 2, mode = :default)
+    self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 20, mode = :default)
   end
 
   def button_down_game_waiting(id)
@@ -282,33 +278,68 @@ class Clue < Gosu::Window
   def draw_game 
     @background.draw(100,80,0)
     @board.draw
-    @font.draw_text("Detective Sheet", 1600, 100, 3)
+    @font.draw_text("Detective Sheet", 1600, 100, 50)
     @detective_sheet.draw
-
+    z = 10
     case @game_button_set
     when :room_buttons
+      border = 2
+      x_1 = x
+      y_1 = y + border
+      x_2 = x_1 + width
+      y_2 = y_1
+      x_3 = x_2
+      y_3 = y_2 + height - (border * 2)
+      x_4 = x_1
+      y_4 = y_3
+      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-      @font.draw_text("What room would you like to go to?", 1600, 200, 3)
+      @font.draw_text("What room would you like to go to?", 1600, 200, z + 1)
       @room_buttons.each { |room_button| room_button.draw }
     when :decision_buttons
+      border = 2
+      x_1 = x
+      y_1 = y + border
+      x_2 = x_1 + width
+      y_2 = y_1
+      x_3 = x_2
+      y_3 = y_2 + height - (border * 2)
+      x_4 = x_1
+      y_4 = y_3
+      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-      @font.draw_text("Are you making a suggestion or an accusation?", 350, 170, 3)
+      @font.draw_text("Are you making a suggestion or an accusation?", 350, 170, z + 1)
       @suggestion_button.draw
       @accusation_button.draw
     when :character_buttons
+      border = 2
+      x_1 = x
+      y_1 = y + border
+      x_2 = x_1 + width
+      y_2 = y_1
+      x_3 = x_2
+      y_3 = y_2 + height - (border * 2)
+      x_4 = x_1
+      y_4 = y_3
+      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-      @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, 3)
+      @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, z + 1)
       @character_buttons.each { |character_button| character_button.draw }
     when :weapon_buttons
+      border = 2
+      x_1 = x
+      y_1 = y + border
+      x_2 = x_1 + width
+      y_2 = y_1
+      x_3 = x_2
+      y_3 = y_2 + height - (border * 2)
+      x_4 = x_1
+      y_4 = y_3
+      window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, 3)
+      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, z + 1)
       @weapon_buttons.each { |weapon_button| weapon_button.draw }
-    else
-    end # incomplete 
-
-    if my_player.my_turn
-      # @detective_sheet_info.draw_text("Hand: ", 1800, 200, 3)
-    end
+    end 
   end 
 
   def button_down_game(id)
@@ -395,7 +426,6 @@ class Clue < Gosu::Window
   def my_player
     @players.select {|player| player.id == @my_player_id }.first
   end
-  
 end
 
 window = Clue.new
