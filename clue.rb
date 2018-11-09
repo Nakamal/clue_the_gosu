@@ -20,7 +20,7 @@ class Clue < Gosu::Window
   HEIGHT = 1400
   attr_accessor :height, :width, :fullscreen, :id
   
-  # BEGINNING SETUP ******************************************************
+  # MAIN SETUP ************************************************************
 
   def initialize
     super(WIDTH, HEIGHT, false)
@@ -95,7 +95,9 @@ class Clue < Gosu::Window
       button_down_game_waiting(id)
     end
   end
+
   # START ******************************************************************
+
   def initialize_start   
     @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
   end
@@ -136,6 +138,7 @@ class Clue < Gosu::Window
       initialize_character_selecting
     end
   end  
+
   # CHARACTER SELECTING ******************************************************
 
   def initialize_character_selecting
@@ -392,8 +395,8 @@ class Clue < Gosu::Window
   def my_player
     @players.select {|player| player.id == @my_player_id }.first
   end
+  
 end
 
 window = Clue.new
 window.show
-
