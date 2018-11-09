@@ -20,6 +20,8 @@ class Clue < Gosu::Window
   HEIGHT = 1400
   attr_accessor :height, :width, :fullscreen, :id
   
+  # BEGINNING SETUP ******************************************************
+
   def initialize
     super(WIDTH, HEIGHT, false)
     @board = Board.new(window: self)
@@ -36,50 +38,6 @@ class Clue < Gosu::Window
     @message = ""
     initialize_start
     @game_organizer = false 
-  end
-    
-  def initialize_start   
-    @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
-
-
-    # testing =========================================
-    # detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/302/sheet").parse
-    # @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
-    # testing =========================================
-
-  end
-
-  def initialize_character_selecting
-    parsed_response = HTTP.get("#{BASE_ROOT_URL}/api/games/#{@current_game_id}").parse
-    @available_characters = []
-    character_starting_line = 355
-    parsed_response["available_characters"].each_with_index do |character, index|
-      @available_characters << Button.new(window: self, x: 1200, y: character_starting_line + (130 * index), text: character["name"], id: character["id"])
-    end
-  end
-
-  def initialize_waiting
-    @start_game_button = Button.new(window: self, x: 1200, y: 847, text: "Start Game")
-    @players = []
-    @last_time = Gosu::milliseconds
-  end
-
-  def initialize_game_waiting
-    @last_time = Gosu::milliseconds
-    initialize_game
-  end
-
-  def initialize_game
-    @choosen_room = nil
-    @choosen_weapon = nil
-    @choosen_character = nil
-    @game_button_set = :none
-    detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
-    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
-
-    @available_rooms = Room.buttons(self)
-    @available_weapons = Weapon.buttons(self)
-    @available_characters = Character.buttons(self)  
   end
 
   def update 
@@ -123,6 +81,24 @@ class Clue < Gosu::Window
     @font.draw_text("Y: #{mouse_y.round(0)}", 2200, 50, 1) # remove once you have the visuals in place
   end
 
+  def button_down(id)
+    case @scene
+    when :start
+      button_down_start(id)
+    when :character_selecting
+      button_down_character_selecting(id)
+    when :waiting
+      button_down_waiting(id)
+    when :game
+      button_down_game(id)
+    when :game_waiting
+      button_down_game_waiting(id)
+    end
+  end
+  # START ******************************************************************
+  def initialize_start   
+    @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
+  end
   def update_start
     if self.text_input.text == ""
       @new_game_button.text = "New Game"
@@ -145,117 +121,6 @@ class Clue < Gosu::Window
 
   end 
 
-  def update_character_selecting
-
-  end
-
-  def draw_character_selecting
-    @font.draw_text("Choose your Character", 950, 200, 1)
-    @available_characters.each {|character_button| character_button.draw }
-    @font.draw_text("Player ID: #{self.text_input.text}", 70, 200, 1)
-    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
-    
-    @font.draw_text(@message, 1800, 250, 1)
-  end
-
-  def update_waiting
-    if (Gosu::milliseconds - @last_time) / 1000 == 1
-      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash) }
-      if response.parse["game_started"]
-        @scene = :game_waiting
-        initialize_game_waiting
-      end
-      @last_time = Gosu::milliseconds
-    end
-  end
-
-  def draw_waiting
-    @font.draw_text("waiting", 1050, 100, 1)
-    @font.draw_text("Player Name: #{@player_name}", 1050, 250, 1)
-    @font.draw_text("Character Name: #{@character_name}", 1050, 400, 1)
-    @font.draw_text(@message, 1050, 400, 1)
-    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
-    @start_game_button.draw if @game_organizer == true
-  end 
-
-  def update_game_waiting
-    if (Gosu::milliseconds - @last_time) / 1000 == 1
-      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash) }
-      @scene = :game if response.parse["my_turn"]
-      @last_time = Gosu::milliseconds()
-    end
-  end
-
-  def draw_game_waiting
-    @background.draw(100,80,0)
-    @board.draw
-    @font.draw_text("And now you play, the waiting game...", 840, 400, 3)
-    @font.draw_text("Detective Sheet", 1800, 100, 3)
-    background_c = Gosu::Color.argb(0x88_000000)
-    self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 2, mode = :default)
-  end
-
-  def update_game
-
-  end
-
-
-  def draw_game 
-    @background.draw(100,80,0)
-    @board.draw
-    @detective_sheet.draw
-
-    case @game_button_set
-    when :character_buttons
-      @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, 3)
-      @character_buttons.each { |character_button| character_button.draw }
-    when :weapon_buttons
-      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, 3)
-      @weapon_buttons.each { |weapon_button| weapon_button.draw }
-    when :room_buttons
-      @font.draw_text("What room would you like to go to?", 1600, 200, 3)
-      @room_buttons.each { |room_button| room_button.draw }
-    else
-    end # incomplete 
-
-    if my_player.my_turn
-      # @detective_sheet_info.draw_text("Hand: ", 1800, 200, 3)
-    end
-  end 
-
-  def update_win
-    
-  end
-
-  def draw_win(fate)
-  
-  end 
-
-  def update_lose
-    
-  end
-
-  def draw_lose(fate)
-    
-  end
-
-  def button_down(id)
-    case @scene
-    when :start
-      button_down_start(id)
-    when :character_selecting
-      button_down_character_selecting(id)
-    when :waiting
-      button_down_waiting(id)
-    when :game
-      button_down_game(id)
-    when :game_waiting
-      button_down_game_waiting(id)
-    end
-  end
-
   def button_down_start(id) 
     if (id == Gosu::MsLeft) && (mouse_x - @new_game_button.x).abs < (@new_game_button.width / 2) && (mouse_y - @new_game_button.y).abs < (@new_game_button.height / 2)
       if self.text_input.text == ""
@@ -271,6 +136,29 @@ class Clue < Gosu::Window
       initialize_character_selecting
     end
   end  
+  # CHARACTER SELECTING ******************************************************
+
+  def initialize_character_selecting
+    parsed_response = HTTP.get("#{BASE_ROOT_URL}/api/games/#{@current_game_id}").parse
+    @available_characters = []
+    character_starting_line = 355
+    parsed_response["available_characters"].each_with_index do |character, index|
+      @available_characters << Button.new(window: self, x: 1200, y: character_starting_line + (130 * index), text: character["name"], id: character["id"])
+    end
+  end
+
+  def update_character_selecting
+
+  end
+
+  def draw_character_selecting
+    @font.draw_text("Choose your Character", 950, 200, 1)
+    @available_characters.each {|character_button| character_button.draw }
+    @font.draw_text("Player ID: #{self.text_input.text}", 70, 200, 1)
+    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
+    
+    @font.draw_text(@message, 1800, 250, 1)
+  end
 
   def button_down_character_selecting(id)
     if (id == Gosu::MsLeft) 
@@ -298,6 +186,35 @@ class Clue < Gosu::Window
     end
   end
 
+  # WAITING *******************************************************************
+
+  def initialize_waiting
+    @start_game_button = Button.new(window: self, x: 1200, y: 847, text: "Start Game")
+    @players = []
+    @last_time = Gosu::milliseconds
+  end
+
+  def update_waiting
+    if (Gosu::milliseconds - @last_time) / 1000 == 1
+      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash) }
+      if response.parse["game_started"]
+        @scene = :game_waiting
+        initialize_game_waiting
+      end
+      @last_time = Gosu::milliseconds
+    end
+  end
+
+  def draw_waiting
+    @font.draw_text("waiting", 1050, 100, 1)
+    @font.draw_text("Player Name: #{@player_name}", 1050, 250, 1)
+    @font.draw_text("Character Name: #{@character_name}", 1050, 400, 1)
+    @font.draw_text(@message, 1050, 400, 1)
+    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
+    @start_game_button.draw if @game_organizer == true
+  end 
+
   def button_down_waiting(id)
     if @game_organizer && (id == Gosu::MsLeft) && (mouse_x - @start_game_button.x).abs < (@start_game_button.width / 2) && (mouse_y - @start_game_button.y).abs < (@start_game_button.height / 2)
       response = HTTP.patch("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/start")
@@ -309,10 +226,88 @@ class Clue < Gosu::Window
     end  
   end
 
+  # GAME WAITING ***************************************************************
+
+  def initialize_game_waiting
+    @last_time = Gosu::milliseconds
+  end
+
+  def update_game_waiting
+    if (Gosu::milliseconds - @last_time) / 1000 == 1
+      response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
+      @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash) }
+      if response.parse["my_turn"]
+        @scene = :game 
+        initialize_game
+      end
+      @last_time = Gosu::milliseconds()
+    end
+  end
+
+  def draw_game_waiting
+    @background.draw(100,80,0)
+    @board.draw
+    @font.draw_text("And now you play, the waiting game...", 840, 400, 3)
+    @font.draw_text("Detective Sheet", 1600, 100, 3)
+    background_c = Gosu::Color.argb(0x88_000000)
+    self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 2, mode = :default)
+  end
+
   def button_down_game_waiting(id)
     
   end
-    #define the instance variable for available_rooms, availalable_weapons and double check the available characters
+
+  # GAME ************************************************************************
+
+  def initialize_game
+    @choosen_room = nil
+    @choosen_weapon = nil
+    @choosen_character = nil
+    @game_button_set = :none
+    detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
+    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
+
+    @available_rooms = Room.buttons(self)
+    @available_weapons = Weapon.buttons(self)
+    @available_characters = Character.buttons(self)  
+  end
+
+  def update_game
+
+  end
+
+  def draw_game 
+    @background.draw(100,80,0)
+    @board.draw
+    @font.draw_text("Detective Sheet", 1600, 100, 3)
+    @detective_sheet.draw
+
+    case @game_button_set
+    when :room_buttons
+
+      @font.draw_text("What room would you like to go to?", 1600, 200, 3)
+      @room_buttons.each { |room_button| room_button.draw }
+    when :decision_buttons
+
+      @font.draw_text("Are you making a suggestion or an accusation?", 350, 170, 3)
+      @suggestion_button.draw
+      @accusation_button.draw
+    when :character_buttons
+
+      @font.draw_text("Which shifty suspect do you think committed this heinous act?", 1600, 200, 3)
+      @character_buttons.each { |character_button| character_button.draw }
+    when :weapon_buttons
+
+      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", 1600, 200, 3)
+      @weapon_buttons.each { |weapon_button| weapon_button.draw }
+    else
+    end # incomplete 
+
+    if my_player.my_turn
+      # @detective_sheet_info.draw_text("Hand: ", 1800, 200, 3)
+    end
+  end 
+
   def button_down_game(id)
     @available_rooms.each do |room_button|
       if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
@@ -363,6 +358,28 @@ class Clue < Gosu::Window
       end
     end
   end  
+
+  # WIN SETUP *******************************************************************
+
+  def update_win
+    
+  end
+
+  def draw_win(fate)
+  
+  end 
+
+  # LOSE SETUP ******************************************************************
+
+  def update_lose
+    
+  end
+
+  def draw_lose(fate)
+    
+  end
+
+  # LONE METHODS ****************************************************************
 
   def needs_cursor?
     true
