@@ -3,12 +3,16 @@ require 'gosu'
 class PopUpWindow
   attr_accessor :x, :y, :z, :window, :height, :width
   def initialize(options_hash)
-    @x = options_hash[:x] || 400
-    @y = options_hash[:y] || 200
+    @x = options_hash[:x] || 190
+    @y = options_hash[:y] || 110
     @window = options_hash[:window]
     @z = options_hash[:z] || 10
-    @height = options_hash[:height] || 1000
-    @width = options_hash[:width] || 900
+    @height = options_hash[:height] || 1200
+    @width = options_hash[:width] || 1100
+  end
+
+  def center_x
+    x + (width / 2)
   end
 
   def draw

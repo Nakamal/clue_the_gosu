@@ -269,10 +269,13 @@ class Clue < Gosu::Window
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
     @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
     @pop_up = PopUpWindow.new(window: self)
+    pop_up_offset_x = @pop_up.center_x
+    pop_up_offset_y = @pop_up.y + 170
+    button_height = 110
 
-    @room_buttons = Room.buttons(self)
-    @weapon_buttons = Weapon.buttons(self)
-    @character_buttons = Character.buttons(self)  
+    @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    @weapon_buttons = Weapon.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    @character_buttons = Character.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)  
   end
 
   def update_game
@@ -290,22 +293,30 @@ class Clue < Gosu::Window
 
     when :room_buttons
       @pop_up.draw
-      @font.draw_text("What room would you like to go to?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
+      header_message = "What room would you like to go to?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
       @room_buttons.each { |room_button| room_button.draw }
 
     when :character_buttons
       @pop_up.draw
-      @font.draw_text("Which shifty suspect do you think committed this heinous act?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
+      header_message = "Which shifty suspect do you think committed this heinous act?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
       @character_buttons.each { |character_button| character_button.draw }
 
     when :weapon_buttons
       @pop_up.draw
-      @font.draw_text("And how do you think said shifty suspect accomplished this vile feat?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
+      header_message = "And how do you think said shifty suspect accomplished this vile feat?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
       @weapon_buttons.each { |weapon_button| weapon_button.draw }
 
     when :decision_buttons
       @pop_up.draw
-      @font.draw_text("Are you making a suggestion or an accusation?", @pop_up.x + 50, @pop_up.y + 50, z + 1)
+      header_message = "Are you making a suggestion or an accusation?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
       # @suggestion_button.draw
       # @accusation_button.draw
     end 

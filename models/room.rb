@@ -14,7 +14,16 @@ class Room
 
   def self.buttons(options_hash)
     starting_line = options_hash[:y]
-    # break into multiple lines
-    all.map.with_index {|object_type, index| Button.new(window: options_hash[:window], x: options_hash[:x], y: starting_line + (options_hash[:height] * index), id: object_type.id, text: options_hash[:text])}
+
+    all.map.with_index do |object_type, index|
+      Button.new(
+                  window: options_hash[:window], 
+                  x: options_hash[:x], 
+                  y: starting_line + (options_hash[:height] * index), 
+                  z: options_hash[:z],
+                  id: object_type.id, 
+                  text: object_type.name
+                )
+    end
   end
 end

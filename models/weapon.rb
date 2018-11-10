@@ -12,8 +12,17 @@ class Weapon
     @available_weapons = weapons_response.map { |weapon_hash| Weapon.new(weapon_hash) }
   end
 
-  def self.buttons(window)
-    starting_line = 355
-    all.map.with_index {|object_type, index| Button.new(window: window, x: 1200, y: starting_line + (130 * index), id: object_type.id)}
+  def self.buttons(options_hash)
+    starting_line = options_hash[:y]
+
+    all.map.with_index do |object_type, index|
+      Button.new(
+                  window: options_hash[:window], 
+                  x: options_hash[:x], 
+                  y: starting_line + (options_hash[:height] * index), 
+                  id: object_type.id, 
+                  text: object_type.name
+                )
+    end
   end
 end

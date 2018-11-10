@@ -3,11 +3,12 @@
  BUTTON_PADDING = 30
 
  class Button
-  attr_accessor :window, :x, :y, :height, :width, :color, :text, :id
+  attr_accessor :window, :x, :y, :z, :height, :width, :color, :text, :id
   def initialize(options_hash)
     @window = options_hash[:window]
     @x = options_hash[:x]
     @y = options_hash[:y]
+    @z = options_hash[:z] || 10
     @color = options_hash[:color]
     @text = options_hash[:text]
     @id = options_hash[:id]
@@ -44,10 +45,8 @@
     x_4 = x_1
     y_4 = y_3
     c = Gosu::Color.argb(0xAA_650F0B)
-    window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z = 0, mode = :default)
+    window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z, mode = :default)
 
-    @font.draw_text(text, font_x, font_y, 3)
+    @font.draw_text(text, font_x, font_y, z + 1)
   end
-
-
  end
