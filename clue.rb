@@ -323,57 +323,61 @@ class Clue < Gosu::Window
   end 
 
   def button_down_game(id)
-    if @game_button_set == :none && id == 40
-      @game_button_set = :room_buttons
-    end
-
-    @room_buttons.each do |room_button|
-      if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
-        puts room_button.text
-        @choosen_room = room_button.text
-        @game_button_set = :character_buttons
+    case @game_button_set
+    when :none
+      if id == 40
+        @game_button_set = :room_buttons
       end
-    end
-
-    @character_buttons.each do |character_button|
-      if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
-        puts character_button.text
-        @game_button_set = :weapon_buttons
-      end
-    end
-
-    @weapon_buttons.each do |weapon_button|
-      if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
-        puts weapon_button.text
-        @choosen_weapon = weapon_button.text
-        @game_button_set = :decision_buttons
-      end
-    end
-
-    if @choosen_room && @choosen_character && @choosen_weapon
-      if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
-        @suggestion_button.text
-        # send params
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-        if parsed_response["move_forward"]
-          @suggestion = parsed_response["suggestion"]
-          @choosen_room = nil
-          @choosen_weapon = nil
-          @choosen_character = nil
+    when :room_buttons
+      @room_buttons.each do |room_button|
+        if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
+          puts room_button.text
+          @choosen_room = room_button.text
+          @game_button_set = :character_buttons
         end
       end
-
-
-      if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
-        @accusation_button.text
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-        if parsed_response["move_forward"]
-          @accusation = parsed_response["accusation"]
-          @choosen_room = nil
-          @choosen_weapon = nil
-          @choosen_character = nil
+    when :character_buttons
+      @character_buttons.each do |character_button|
+        if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
+          puts character_button.text
+          @choosen_character = character_button.text
+          @game_button_set = :weapon_buttons
         end
       end
+    when :weapon_buttons
+      @weapon_buttons.each do |weapon_button|
+        if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
+          puts weapon_button.text
+          @choosen_weapon = weapon_button.text
+          @game_button_set = :decision_buttons
+        end
+      end
+    when :decision_buttons
+      if @choosen_room && @choosen_character && @choosen_weapon
+        if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
+          @suggestion_button.text
+          # send params
+          parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+          if parsed_response["move_forward"]
+            @suggestion = parsed_response["suggestion"]
+            @choosen_room = nil
+            @choosen_weapon = nil
+            @choosen_character = nil
+          end
+        end
+
+
+        if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
+          @accusation_button.text
+          parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
+          if parsed_response["move_forward"]
+            @accusation = parsed_response["accusation"]
+            @choosen_room = nil
+            @choosen_weapon = nil
+            @choosen_character = nil
+          end
+        end
+      end        
     end
   end  
 
