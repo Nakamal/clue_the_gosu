@@ -41,6 +41,17 @@ class Clue < Gosu::Window
     @message = ""
     initialize_start
     @game_organizer = false 
+
+    @pop_up = PopUpWindow.new(window: self)
+    pop_up_offset_x = @pop_up.center_x
+    pop_up_offset_y = @pop_up.y + 170
+    button_height = 110
+
+    @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    @weapon_buttons = Weapon.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    @character_buttons = Character.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    @suggestion_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, text: "Suggestion")
+    @accusation_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y + button_height, z: @pop_up.z + 1, text: "Accusation")
   end
 
   def update 
@@ -268,14 +279,7 @@ class Clue < Gosu::Window
     @game_button_set = :none
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
     @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
-    @pop_up = PopUpWindow.new(window: self)
-    pop_up_offset_x = @pop_up.center_x
-    pop_up_offset_y = @pop_up.y + 170
-    button_height = 110
-
-    @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
-    @weapon_buttons = Weapon.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
-    @character_buttons = Character.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)  
+     
   end
 
   def update_game
@@ -317,8 +321,8 @@ class Clue < Gosu::Window
       header_message = "Are you making a suggestion or an accusation?"
       header_width = @font.text_width(header_message)
       @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
-      # @suggestion_button.draw
-      # @accusation_button.draw
+      @suggestion_button.draw
+      @accusation_button.draw
     end 
   end 
 
@@ -353,52 +357,89 @@ class Clue < Gosu::Window
         end
       end
     when :decision_buttons
-      if @choosen_room && @choosen_character && @choosen_weapon
-        if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
-          @suggestion_button.text
-          # send params
-          parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-          if parsed_response["move_forward"]
-            @suggestion = parsed_response["suggestion"]
-            @choosen_room = nil
-            @choosen_weapon = nil
-            @choosen_character = nil
-          end
+      
+      if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
+        params = {
+          new_location: @choosen_room,
+          weapon: @choosen_weapon,
+          character: @choosen_character
+        }
+        print "*" * 15
+        print " suggestion "
+        print "*" * 15
+        p params
+        puts "-" * 50
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn", form: params).parse
+        p parsed_response
+        puts "=" * 50
+        if parsed_response["move_forward"]
+          @scene = :game_waiting
+          initialize_game_waiting
+          @choosen_room = nil
+          @choosen_weapon = nil
+          @choosen_character = nil
+        else
+          initialize_game
         end
+      end
 
-
-        if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
-          @accusation_button.text
-          parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn").parse
-          if parsed_response["move_forward"]
-            @accusation = parsed_response["accusation"]
-            @choosen_room = nil
-            @choosen_weapon = nil
-            @choosen_character = nil
-          end
+      if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
+        params = {
+          new_location: @choosen_room,
+          weapon: @choosen_weapon,
+          character: @choosen_character
+        }
+        print "*" * 15
+        print " accusation "
+        print "*" * 15
+        p params
+        puts "-" * 50
+        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn?accusation=true", form: params).parse
+        p parsed_response
+        puts "=" * 50
+        if parsed_response["accusation"]
+          @scene = :win
+          initialize_win
+        else
+          @scene = :lose
+          initialize_lose
         end
-      end        
+      end       
     end
   end  
 
   # WIN SETUP *******************************************************************
 
+  def initialize_win
+    
+  end
+
   def update_win
     
   end
 
-  def draw_win(fate)
-  
+  def draw_win
+    @pop_up.draw
+    header_message = "You win, brag about it."
+    header_width = @font.text_width(header_message)
+    @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, @pop_up.z + 1)
   end 
 
   # LOSE SETUP ******************************************************************
+
+  def initialize_lose
+    
+  end
 
   def update_lose
     
   end
 
-  def draw_lose(fate)
-    
+  def draw_lose
+    @pop_up.draw
+    header_message = "You lose, good day sir...I said good day!"
+    header_width = @font.text_width(header_message)
+    @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, @pop_up.z + 1)
   end
 
   # LONE METHODS ****************************************************************
