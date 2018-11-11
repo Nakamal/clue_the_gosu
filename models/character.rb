@@ -1,11 +1,12 @@
 require 'gosu'
 
 class Character
-  attr_accessor :id, :name, :color
+  attr_accessor :id, :name, :color, :image
   def initialize(options_hash)
     @id = options_hash["id"]
     @name = options_hash["name"]
     @color = options_hash["color"]
+    @image = options_hash["image"]
   end
 
   def self.all

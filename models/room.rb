@@ -5,11 +5,13 @@ class Room
   def initialize(options_hash)
     @id = options_hash["id"] 
     @name = options_hash["name"]
+    @location_x = options_hash["location_x"]
+    @location_y = options_hash["location_y"]
   end
 
   def self.all
     rooms_response = HTTP.get("#{BASE_ROOT_URL}/api/rooms").parse
-    @available_rooms = rooms_response.map { |room_hash| Room.new(room_hash) }
+    rooms_response.map { |room_hash| Room.new(room_hash) }
   end
 
   def self.buttons(options_hash)

@@ -43,6 +43,16 @@ class Board
       end
     end
   end
-end
 
-# Board.new({}).terminal_print
+  def space_at(coords_hash)
+    grid[coords_hash[:row]][coords_hash[:column]]
+  end
+
+  def rooms
+    grid.flatten.select {|space| space.role == :room }
+  end
+
+  def playable_spaces
+    grid.flatten.select {|space| space.role == :playable || space.role == :door }
+  end
+end

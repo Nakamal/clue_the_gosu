@@ -49,7 +49,8 @@ class Clue < Gosu::Window
     pop_up_offset_y = @pop_up.y + 170
     button_height = 110
 
-    @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    # @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
+    @rooms = Room.all
     @weapon_buttons = Weapon.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
     @character_buttons = Character.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
     @suggestion_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, text: "Suggestion")
@@ -214,7 +215,8 @@ class Clue < Gosu::Window
   def update_waiting
     if (Gosu::milliseconds - @last_time) / 1000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash) }
+      @players = response.parse["participations"].map {|participation_hash| Player.new(participation_hash, window: self, board: @board) }
+      @player = @players.select { |player_object| player_object.participation_id == @participation_id }.first
       if response.parse["game_started"]
         @scene = :game_waiting
         initialize_game_waiting
@@ -254,7 +256,7 @@ class Clue < Gosu::Window
   def update_game_waiting
     if (Gosu::milliseconds - @last_time) / 1000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
-      @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash) }
+      @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash, window: self, board: @board) }
       if response.parse["game_completed"]
         @scene = :lose
         initialize_lose
@@ -299,19 +301,20 @@ class Clue < Gosu::Window
 
   def draw_game 
     @background.draw(100,80,0)
-    @board.draw
+    # @board.draw # uncomment to see the colors
+    @players.each { |player| player.draw }
     @font.draw_text("Detective Sheet", 1600, 100, 50)
     @detective_sheet.draw
     z = 10
 
     case @game_button_set
 
-    when :room_buttons
-      @pop_up.draw
-      header_message = "What room would you like to go to?"
-      header_width = @font.text_width(header_message)
-      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
-      @room_buttons.each { |room_button| room_button.draw }
+    when :room_selection
+      # @pop_up.draw
+      # header_message = "What room would you like to go to?"
+      # header_width = @font.text_width(header_message)
+      # @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
+      # @room_buttons.each { |room_button| room_button.draw }
 
     when :character_buttons
       @pop_up.draw
@@ -342,17 +345,21 @@ class Clue < Gosu::Window
     when :none
       if id == 40
         if @game_status
-          @game_button_set = :room_buttons
+          @game_button_set = :room_selection
         else
           @scene = :game_waiting
           initialize_game_waiting
         end
       end
-    when :room_buttons
-      @room_buttons.each do |room_button|
-        if (mouse_x - room_button.x).abs < (room_button.width / 2) && (mouse_y - room_button.y).abs < (room_button.height / 2)
-          puts room_button.text
-          @choosen_room = room_button.text
+    when :room_selection
+      @board.rooms.each do |room_space|
+        if (mouse_x - room_space.middle_x).abs < (room_space.width / 2) && (mouse_y - room_space.middle_y).abs < (room_space.height / 2)
+          @choosen_room = room_space.name
+          #change coordinates on gosu =============================
+          room = @rooms.select { |room_object| room_object.name == @choosen_room }.first
+          @player.current_location_x = room.location_x
+          @player.current_location_y = room.location_y
+          #========================================================
           @game_button_set = :character_buttons
         end
       end
@@ -378,7 +385,9 @@ class Clue < Gosu::Window
         params = {
           new_location: @choosen_room,
           weapon: @choosen_weapon,
-          character: @choosen_character
+          character: @choosen_character,
+          current_location_x: @player.current_location_x,
+          current_location_y: @player.current_location_y
         }
         print "*" * 15
         print " suggestion "
