@@ -1,7 +1,7 @@
 require 'gosu'
 
 class Room
-  attr_accessor :id, :name
+  attr_accessor :id, :name, :location_x, :location_y
   def initialize(options_hash)
     @id = options_hash["id"] 
     @name = options_hash["name"]

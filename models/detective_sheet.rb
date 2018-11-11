@@ -7,12 +7,6 @@ class DetectiveSheet
   attr_accessor :characters, :weapons, :rooms, :x, :y, :window, :font
   
   def initialize(sections_hash, options_hash)
-    puts "*" * 50
-    puts "*" * 50
-    puts "errors once in a while"
-    p sections_hash
-    puts "*" * 50
-    puts "*" * 50
     @characters = sections_hash["sheet_infos"]["characters"]
     @weapons = sections_hash["sheet_infos"]["weapons"]
     @rooms = sections_hash["sheet_infos"]["rooms"]

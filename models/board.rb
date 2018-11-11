@@ -49,10 +49,10 @@ class Board
   end
 
   def rooms
-    grid.flatten.select {|space| space.role == :room }
+    grid.flatten.select { |space| space.role == :room }
   end
 
   def playable_spaces
-    grid.flatten.select {|space| space.role == :playable || space.role == :door }
+    grid.flatten.select { |space| space.role == :playable || space.role == :door }
   end
 end

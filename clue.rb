@@ -293,8 +293,7 @@ class Clue < Gosu::Window
     @game_button_set = :none
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
     puts "initialize game"
-    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
-     
+    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190) 
   end
 
   def update_game
@@ -356,11 +355,14 @@ class Clue < Gosu::Window
     when :room_selection
       @board.rooms.each do |room_space|
         if (mouse_x - room_space.middle_x).abs < (room_space.width / 2) && (mouse_y - room_space.middle_y).abs < (room_space.height / 2)
-          @choosen_room = room_space.room
+
           #change coordinates on gosu =============================
-          room = @rooms.select { |room_object| room_object.room == @choosen_room }.first
+          @choosen_room = room_space.room
+          room = @rooms.select { |room_object| room_object.name == @choosen_room }.first
           @player.current_location_x = room.location_x
           @player.current_location_y = room.location_y
+          p "You're currently located at x: #{@player.current_location_x}"
+          p "You're currently located at y: #{@player.current_location_y}"
           #========================================================
           @game_button_set = :character_buttons
         end

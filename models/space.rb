@@ -101,5 +101,4 @@ class Space
 
     window.draw_quad(x_1, y_1, c, x_2, y_2, c, x_3, y_3, c, x_4, y_4, c, z = 0, mode = :default)
   end
-
 end
