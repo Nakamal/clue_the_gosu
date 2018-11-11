@@ -250,7 +250,6 @@ class Clue < Gosu::Window
   def initialize_game_waiting
     @last_time = Gosu::milliseconds
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
-    puts "initialize game waiting"
     @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
   end
 
@@ -292,7 +291,6 @@ class Clue < Gosu::Window
     @choosen_character = nil
     @game_button_set = :none
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
-    puts "initialize game"
     @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190) 
   end
 
@@ -361,8 +359,6 @@ class Clue < Gosu::Window
           room = @rooms.select { |room_object| room_object.name == @choosen_room }.first
           @player.current_location_x = room.location_x
           @player.current_location_y = room.location_y
-          p "You're currently located at x: #{@player.current_location_x}"
-          p "You're currently located at y: #{@player.current_location_y}"
           #========================================================
           @game_button_set = :character_buttons
         end
@@ -387,20 +383,14 @@ class Clue < Gosu::Window
       
       if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
         params = {
-          new_location: @choosen_room,
-          weapon: @choosen_weapon,
-          character: @choosen_character,
-          current_location_x: @player.current_location_x,
-          current_location_y: @player.current_location_y
-        }
-        print "*" * 15
-        print " suggestion "
-        print "*" * 15
-        p params
-        puts "-" * 50
+                  new_location: @choosen_room,
+                  weapon: @choosen_weapon,
+                  character: @choosen_character,
+                  current_location_x: @player.current_location_x,
+                  current_location_y: @player.current_location_y
+                 }
+
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn", form: params).parse
-        p parsed_response
-        puts "=" * 50
         if parsed_response["move_forward"]
           @scene = :game_waiting
           initialize_game_waiting
@@ -414,18 +404,13 @@ class Clue < Gosu::Window
 
       if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
         params = {
-          new_location: @choosen_room,
-          weapon: @choosen_weapon,
-          character: @choosen_character
-        }
-        print "*" * 15
-        print " accusation "
-        print "*" * 15
-        p params
-        puts "-" * 50
+                  new_location: @choosen_room,
+                  weapon: @choosen_weapon,
+                  character: @choosen_character
+                 }
+
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn?accusation=true", form: params).parse
-        p parsed_response
-        puts "=" * 50
+        
         if parsed_response["accusation"]
           @scene = :win
           initialize_win
