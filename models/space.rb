@@ -8,7 +8,7 @@ X_OFFSET = 146
 
 class Space
 
-  attr_accessor :row, :column, :step, :role, :window, :width, :height
+  attr_accessor :row, :column, :step, :role, :window, :width, :height, :room
 
   def initialize(input_hash)
     @@window ||= input_hash[:window]
@@ -26,7 +26,7 @@ class Space
     @role = input_hash[:role] || :playable
     @room = input_hash[:room] || "none"
     @width = SQUARE_WIDTH
-    @hieght = SQUARE_WIDTH
+    @height = SQUARE_WIDTH
     @step = 0
   end
 
