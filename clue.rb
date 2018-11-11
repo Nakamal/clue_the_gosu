@@ -37,6 +37,8 @@ class Clue < Gosu::Window
     self.text_input = Gosu::TextInput.new
     self.text_input.text = ""
     @last_time = 0
+    @game_status = true
+    @youre_active = true
     @characters = []
     @message = ""
     initialize_start
@@ -107,6 +109,8 @@ class Clue < Gosu::Window
       button_down_game(id)
     when :game_waiting
       button_down_game_waiting(id)
+    when :lose
+      button_down_lose(id)
     end
   end
 
@@ -243,13 +247,19 @@ class Clue < Gosu::Window
 
   def initialize_game_waiting
     @last_time = Gosu::milliseconds
+    detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
+    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
   end
 
   def update_game_waiting
     if (Gosu::milliseconds - @last_time) / 1000 == 1
       response = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn_check")
       @players = response.parse["participations"].map { |participation_hash| Player.new(participation_hash) }
-      if response.parse["my_turn"]
+      if response.parse["game_completed"]
+        @scene = :lose
+        initialize_lose
+      elsif response.parse["my_turn"]
+        @game_status = response.parse["game_status"]
         @scene = :game 
         initialize_game
       end
@@ -262,6 +272,7 @@ class Clue < Gosu::Window
     @board.draw
     @font.draw_text("And now you play, the waiting game...", 400, 180, 30)
     @font.draw_text("Detective Sheet", 1600, 100, 50)
+    @detective_sheet.draw
     background_c = Gosu::Color.argb(0x88_000000)
     self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 20, mode = :default)
   end
@@ -330,7 +341,12 @@ class Clue < Gosu::Window
     case @game_button_set
     when :none
       if id == 40
-        @game_button_set = :room_buttons
+        if @game_status
+          @game_button_set = :room_buttons
+        else
+          @scene = :game_waiting
+          initialize_game_waiting
+        end
       end
     when :room_buttons
       @room_buttons.each do |room_button|
@@ -419,10 +435,9 @@ class Clue < Gosu::Window
   end
 
   def draw_win
-    @pop_up.draw
-    header_message = "You win, brag about it."
+    header_message = "You've solved the case, looks like that phone call from J. Edgar Hoover was for you."
     header_width = @font.text_width(header_message)
-    @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, @pop_up.z + 1)
+    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 500, 1)
   end 
 
   # LOSE SETUP ******************************************************************
@@ -436,10 +451,24 @@ class Clue < Gosu::Window
   end
 
   def draw_lose
-    @pop_up.draw
     header_message = "You lose, good day sir...I said good day!"
     header_width = @font.text_width(header_message)
-    @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, @pop_up.z + 1)
+    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 500, 1)
+    if @game_status 
+      loser_message = "You lost, but you can still move around and mess other players up, oh what fun"
+      loser_width = @font.text_width(loser_message)
+      @font.draw_text(loser_message, (WIDTH / 2) - (loser_width / 2), 600, 1)
+      loser_command = "Press 'enter' to keep playing...(yes you have to keep playing)"
+      loser_command_width = @font.text_width(loser_command)
+      @font.draw_text(loser_command, (WIDTH / 2) - (loser_command_width / 2), 700, 1)
+    end
+  end
+
+  def button_down_lose(id)
+    if @game_status && id == 40
+      @scene = :game_waiting
+      initialize_game_waiting
+    end
   end
 
   # LONE METHODS ****************************************************************
