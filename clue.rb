@@ -16,7 +16,7 @@ require_relative 'models/room'
 require_relative 'models/space'
 require_relative 'models/weapon'
 
-BASE_ROOT_URL = "http://localhost:3000"
+BASE_ROOT_URL = "https://clue-the-heroku.herokuapp.com"
 
 class Clue < Gosu::Window 
   WIDTH = 2400
@@ -32,8 +32,8 @@ class Clue < Gosu::Window
     self.caption = 'Clue' 
     @background = Gosu::Image.new(self, 'media/final_board.png')
   
-    @font = Gosu::Font.new(self, "Nimbus Mono L", HEIGHT / 30)
-    @font_2 = Gosu::Font.new(self, "Nimbus Mono L", HEIGHT / 5)
+    @font = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 30)
+    @font_2 = Gosu::Font.new(self, "media/pythago0.ttf", HEIGHT / 5)
     self.text_input = Gosu::TextInput.new
     self.text_input.text = ""
     @last_time = 0
@@ -410,7 +410,7 @@ class Clue < Gosu::Window
                  }
 
         parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn?accusation=true", form: params).parse
-        
+
         if parsed_response["accusation"]
           @scene = :win
           initialize_win

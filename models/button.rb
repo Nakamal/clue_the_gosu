@@ -13,7 +13,7 @@
     @text = options_hash[:text]
     @id = options_hash[:id]
     @text_height = 40
-    @font = Gosu::Font.new(window, "Nimbus Mono L", @text_height)
+    @font = Gosu::Font.new(window, "media/GalliaMTStd.otf", @text_height)
     @height = @text_height + BUTTON_PADDING * 2
     @width = @font.text_width(text) + BUTTON_PADDING * 2
   end
