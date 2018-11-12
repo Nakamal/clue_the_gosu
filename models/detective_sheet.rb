@@ -14,7 +14,7 @@ class DetectiveSheet
     @x = options_hash[:x]
     @y = options_hash[:y]
     @window = options_hash[:window]
-    @font = Gosu::Font.new(window, "Nimbus Mono L", 20)
+    @font = Gosu::Font.new(window, "media/GalliaMTStd.otf", 20)
 
     @lines = []
 
