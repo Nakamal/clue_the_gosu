@@ -32,10 +32,12 @@ class Clue < Gosu::Window
     self.caption = 'Clue'
 
     @background = Gosu::Image.new(self, 'media/final_board.png')
-    @border = Gosu::Image.new(self, 'media/game_images/ending.png') # fix the size for win and lose
+    @border = Gosu::Image.new(self, 'media/game_images/win_lose_edited.png') # fix the size for win and lose
     @start_image = Gosu::Image.new(self, 'media/game_images/official_clue_opening_image.png')
     @character_select_image = Gosu::Image.new(self, 'media/game_images/clue_alt_image.png')
     @waiting_image = Gosu::Image.new(self, 'media/game_images/clue_card.png')
+    @win_image = Gosu::Image.new(self, 'media/game_images/win_picture.png')
+    @lose_image = Gosu::Image.new(self, 'media/game_images/lose_picture.png')
 
   
     @font = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 30)
@@ -292,7 +294,7 @@ class Clue < Gosu::Window
   def draw_game_waiting
     @background.draw(100,80,0)
     @board.draw
-    @font.draw_text("Currently you're playing, Waiting... the game", 150, 150, 30)
+    @font.draw_text("Currently you're playing, Waiting...the game", 130, 150, 30)
     @font.draw_text("Detective Sheet", 1600, 50, 50)
     @detective_sheet.draw
     background_c = Gosu::Color.argb(0xCC_000000)
@@ -465,16 +467,20 @@ class Clue < Gosu::Window
   end
 
   def draw_win
-    @border.draw(100, 80, 0)
-    header_message = "You've solved the case, looks like that phone call from J. Edgar Hoover was for you."
+    @border.draw(30, 10, 0)
+    @win_image.draw(500, 450, 0)
+    header_message = "You've solved the case,"
     header_width = @font.text_width(header_message)
-    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 500, 1)
+    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 200, 1)
+    header_message = "looks like that phone call from J. Edgar Hoover was for you."
+    header_width = @font.text_width(header_message)
+    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 350, 1)
   end 
 
   # LOSE SETUP ******************************************************************
 
   def initialize_lose
-    @start_music = Gosu::Song.new('media/music/16_ya_beatnick.mp3')
+    @start_music = Gosu::Song.new('media/music/14_step_by_step.mp3')
     @start_music.play(looping = true)
   end
 
@@ -483,16 +489,18 @@ class Clue < Gosu::Window
   end
 
   def draw_lose
-    header_message = "You lose, good day sir...I said good day!"
+    @border.draw(30, 10, 0)
+    @lose_image.draw(70, 70, 0)
+    header_message = "No, communism was just a red herring."
     header_width = @font.text_width(header_message)
-    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 500, 1)
+    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 100, 1)
     if @game_status 
-      loser_message = "You lost, but you can still move around and mess other players up, oh what fun"
+      loser_message = "You've lost, but you can still move around to mess other players up, what fun"
       loser_width = @font.text_width(loser_message)
-      @font.draw_text(loser_message, (WIDTH / 2) - (loser_width / 2), 600, 1)
+      @font.draw_text(loser_message, (WIDTH / 2) - (loser_width / 2), 250, 1)
       loser_command = "Press 'enter' to keep playing...(yes you have to keep playing)"
       loser_command_width = @font.text_width(loser_command)
-      @font.draw_text(loser_command, (WIDTH / 2) - (loser_command_width / 2), 700, 1)
+      @font.draw_text(loser_command, (WIDTH / 2) - (loser_command_width / 2), 350, 1)
     end
   end
 
