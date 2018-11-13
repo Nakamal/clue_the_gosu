@@ -14,12 +14,12 @@ class DetectiveSheet
     @x = options_hash[:x]
     @y = options_hash[:y]
     @window = options_hash[:window]
-    @font = Gosu::Font.new(window, "media/GalliaMTStd.otf", 20)
+    @font = Gosu::Font.new(window, "media/GalliaMTStd.otf", 35)
 
     @lines = []
 
-    height = 40
-    width = 350
+    height = 50
+    width = 450
     line = 0
     @lines << DetectiveInfo.new({}, window: window, x: x , y: y + (line * height), width: width, height: height, font: font, header_message: "Characters")
 

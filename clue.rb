@@ -43,10 +43,11 @@ class Clue < Gosu::Window
     @message = ""
     initialize_start
     @game_organizer = false 
+    @keep_playing = true
 
     @pop_up = PopUpWindow.new(window: self)
     pop_up_offset_x = @pop_up.center_x
-    pop_up_offset_y = @pop_up.y + 170
+    pop_up_offset_y = @pop_up.y + 240
     button_height = 110
 
     # @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
@@ -258,7 +259,7 @@ class Clue < Gosu::Window
     @start_music.play(looping = true)
     @last_time = Gosu::milliseconds
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
-    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
+    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 100)
   end
 
   def update_game_waiting
@@ -281,7 +282,7 @@ class Clue < Gosu::Window
     @background.draw(100,80,0)
     @board.draw
     @font.draw_text("And now you play, the waiting game...", 400, 180, 30)
-    @font.draw_text("Detective Sheet", 1600, 100, 50)
+    @font.draw_text("Detective Sheet", 1600, 50, 50)
     @detective_sheet.draw
     background_c = Gosu::Color.argb(0x88_000000)
     self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 20, mode = :default)
@@ -299,9 +300,9 @@ class Clue < Gosu::Window
     @choosen_room = nil
     @choosen_weapon = nil
     @choosen_character = nil
-    @game_button_set = :none
+    @game_button_set = :room_selection
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
-    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190) 
+    @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 100) 
   end
 
   def update_game
@@ -312,7 +313,7 @@ class Clue < Gosu::Window
     @background.draw(100,80,0)
     # @board.draw # uncomment to see the colors
     @players.each { |player| player.draw }
-    @font.draw_text("Detective Sheet", 1600, 100, 50)
+    @font.draw_text("Detective Sheet", 1600, 50, 50)
     @detective_sheet.draw
     z = 10
 
@@ -327,9 +328,12 @@ class Clue < Gosu::Window
 
     when :character_buttons
       @pop_up.draw
-      header_message = "Which shifty suspect do you think committed this heinous act?"
+      header_message = "Which shifty suspect do you think"
       header_width = @font.text_width(header_message)
       @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
+      header_message = "committed this heinous act?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 120, z + 1)
       @character_buttons.each { |character_button| character_button.draw }
 
     when :weapon_buttons
@@ -350,85 +354,84 @@ class Clue < Gosu::Window
   end 
 
   def button_down_game(id)
-    case @game_button_set
-    when :none
+    if !@keep_playing
       if id == 40
-        if @game_status
-          @game_button_set = :room_selection
-        else
-          @scene = :game_waiting
-          initialize_game_waiting
-        end
+        @scene = :game_waiting
+        initialize_game_waiting
       end
-    when :room_selection
-      @board.rooms.each do |room_space|
-        if (mouse_x - room_space.middle_x).abs < (room_space.width / 2) && (mouse_y - room_space.middle_y).abs < (room_space.height / 2)
+    else
+      case @game_button_set
+      when :room_selection
+        @board.rooms.each do |room_space|
+          if (mouse_x - room_space.middle_x).abs < (room_space.width / 2) && (mouse_y - room_space.middle_y).abs < (room_space.height / 2)
 
-          #change coordinates on gosu =============================
-          @choosen_room = room_space.room
-          room = @rooms.select { |room_object| room_object.name == @choosen_room }.first
-          @player.current_location_x = room.location_x
-          @player.current_location_y = room.location_y
-          #========================================================
-          @game_button_set = :character_buttons
+            #change coordinates on gosu =============================
+            @choosen_room = room_space.room
+            room = @rooms.select { |room_object| room_object.name == @choosen_room }.first
+            @player.current_location_x = room.location_x
+            @player.current_location_y = room.location_y
+            #========================================================
+            @game_button_set = :character_buttons
+          end
         end
+      when :character_buttons
+        @character_buttons.each do |character_button|
+          if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
+            puts character_button.text
+            @choosen_character = character_button.text
+            @game_button_set = :weapon_buttons
+          end
+        end
+      when :weapon_buttons
+        @weapon_buttons.each do |weapon_button|
+          if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
+            puts weapon_button.text
+            @choosen_weapon = weapon_button.text
+            @game_button_set = :decision_buttons
+          end
+        end
+      when :decision_buttons
+        
+        if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
+          params = {
+                    new_location: @choosen_room,
+                    weapon: @choosen_weapon,
+                    character: @choosen_character,
+                    current_location_x: @player.current_location_x,
+                    current_location_y: @player.current_location_y
+                   }
+
+          parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn", form: params).parse
+          if parsed_response["move_forward"]
+            @scene = :game_waiting
+            initialize_game_waiting
+            @choosen_room = nil
+            @choosen_weapon = nil
+            @choosen_character = nil
+          else
+            initialize_game
+          end
+        end
+
+        if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
+          params = {
+                    new_location: @choosen_room,
+                    weapon: @choosen_weapon,
+                    character: @choosen_character
+                   }
+
+          parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn?accusation=true", form: params).parse
+
+          if parsed_response["accusation"]
+            @scene = :win
+            initialize_win
+          else
+            @keep_playing = false
+            @scene = :lose
+            initialize_lose
+          end
+        end       
       end
-    when :character_buttons
-      @character_buttons.each do |character_button|
-        if (mouse_x - character_button.x).abs < (character_button.width / 2) && (mouse_y - character_button.y).abs < (character_button.height / 2)
-          puts character_button.text
-          @choosen_character = character_button.text
-          @game_button_set = :weapon_buttons
-        end
-      end
-    when :weapon_buttons
-      @weapon_buttons.each do |weapon_button|
-        if (mouse_x - weapon_button.x).abs < (weapon_button.width / 2) && (mouse_y - weapon_button.y).abs < (weapon_button.height / 2)
-          puts weapon_button.text
-          @choosen_weapon = weapon_button.text
-          @game_button_set = :decision_buttons
-        end
-      end
-    when :decision_buttons
-      
-      if (mouse_x - @suggestion_button.x).abs < (@suggestion_button.width / 2) && (mouse_y - @suggestion_button.y).abs < (@suggestion_button.height / 2)
-        params = {
-                  new_location: @choosen_room,
-                  weapon: @choosen_weapon,
-                  character: @choosen_character,
-                  current_location_x: @player.current_location_x,
-                  current_location_y: @player.current_location_y
-                 }
-
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn", form: params).parse
-        if parsed_response["move_forward"]
-          @scene = :game_waiting
-          initialize_game_waiting
-          @choosen_room = nil
-          @choosen_weapon = nil
-          @choosen_character = nil
-        else
-          initialize_game
-        end
-      end
-
-      if (mouse_x - @accusation_button.x).abs < (@accusation_button.width / 2) && (mouse_y - @accusation_button.y).abs < (@accusation_button.height / 2)
-        params = {
-                  new_location: @choosen_room,
-                  weapon: @choosen_weapon,
-                  character: @choosen_character
-                 }
-
-        parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn?accusation=true", form: params).parse
-
-        if parsed_response["accusation"]
-          @scene = :win
-          initialize_win
-        else
-          @scene = :lose
-          initialize_lose
-        end
-      end       
     end
   end  
 
