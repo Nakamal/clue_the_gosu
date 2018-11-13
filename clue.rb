@@ -117,7 +117,9 @@ class Clue < Gosu::Window
 
   # START ******************************************************************
 
-  def initialize_start   
+  def initialize_start
+    @start_music = Gosu::Song.new('media/music/01_main_title.mp3')
+    @start_music.play(looping = true)   
     @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
   end
 
@@ -157,6 +159,8 @@ class Clue < Gosu::Window
   # CHARACTER SELECTING ******************************************************
 
   def initialize_character_selecting
+    @start_music = Gosu::Song.new('media/music/06_bag_in_hall.mp3')
+    @start_music.play(looping = true)
     parsed_response = HTTP.get("#{BASE_ROOT_URL}/api/games/#{@current_game_id}").parse
     @available_characters = []
     character_starting_line = 355
@@ -207,6 +211,8 @@ class Clue < Gosu::Window
   # WAITING *******************************************************************
 
   def initialize_waiting
+    @start_music = Gosu::Song.new('media/music/04_may_i_present_mr_boddy.mp3')
+    @start_music.play(looping = true)
     @start_game_button = Button.new(window: self, x: 1200, y: 847, text: "Start Game")
     @players = []
     @last_time = Gosu::milliseconds
@@ -248,6 +254,8 @@ class Clue < Gosu::Window
   # GAME WAITING ***************************************************************
 
   def initialize_game_waiting
+    @start_music = Gosu::Song.new('media/music/10_ill_search_the_kitchen.mp3')
+    @start_music.play(looping = true)
     @last_time = Gosu::milliseconds
     detective_sheet_info = HTTP.get("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/sheet").parse
     @detective_sheet = DetectiveSheet.new(detective_sheet_info, window: self, x: 1589, y: 190)
@@ -286,6 +294,8 @@ class Clue < Gosu::Window
   # GAME ************************************************************************
 
   def initialize_game
+    @start_music = Gosu::Song.new('media/music/08_stranger_at_front_door.mp3')
+    @start_music.play(looping = true)
     @choosen_room = nil
     @choosen_weapon = nil
     @choosen_character = nil
@@ -425,7 +435,8 @@ class Clue < Gosu::Window
   # WIN SETUP *******************************************************************
 
   def initialize_win
-    
+    @start_music = Gosu::Song.new('media/music/shake_rattle_and_roll.mp3')
+    @start_music.play(looping = true)
   end
 
   def update_win
@@ -441,7 +452,8 @@ class Clue < Gosu::Window
   # LOSE SETUP ******************************************************************
 
   def initialize_lose
-    
+    @start_music = Gosu::Song.new('media/music/16_ya_beatnick.mp3')
+    @start_music.play(looping = true)
   end
 
   def update_lose
