@@ -33,6 +33,7 @@ class Clue < Gosu::Window
     @background = Gosu::Image.new(self, 'media/final_board.png')
     @border = Gosu::Image.new(self, 'media/game_images/ending.png') # fix the size for win and lose
     @start_image = Gosu::Image.new(self, 'media/game_images/official_clue_opening_image.png')
+    @character_select_image = Gosu::Image.new(self, 'media/game_images/clue_alt_image.png')
 
   
     @font = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 30)
@@ -171,7 +172,7 @@ class Clue < Gosu::Window
     @available_characters = []
     character_starting_line = 355
     parsed_response["available_characters"].each_with_index do |character, index|
-      @available_characters << Button.new(window: self, x: 1200, y: character_starting_line + (130 * index), text: character["name"], id: character["id"])
+      @available_characters << Button.new(window: self, x: 1830, y: character_starting_line + (130 * index), text: character["name"], id: character["id"])
     end
   end
 
@@ -180,10 +181,11 @@ class Clue < Gosu::Window
   end
 
   def draw_character_selecting
-    @font.draw_text("Choose your Character", 950, 200, 1)
+    @character_select_image.draw(200, 100, 0) # edit out the name 'clue' and the white border from this picture 
+    @font_4.draw_text("Choose your Character", 1470, 200, 1)
     @available_characters.each {|character_button| character_button.draw }
-    @font.draw_text("Player ID: #{self.text_input.text}", 70, 200, 1)
-    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
+    @font.draw_text("Player ID: #{self.text_input.text}", 1360, 80, 1)
+    @font.draw_text("Game Id: #{@current_game_id}", 2030, 80, 1)
     
     @font.draw_text(@message, 1800, 250, 1)
   end
