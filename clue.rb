@@ -281,10 +281,10 @@ class Clue < Gosu::Window
   def draw_game_waiting
     @background.draw(100,80,0)
     @board.draw
-    @font.draw_text("And now you play, the waiting game...", 400, 180, 30)
+    @font.draw_text("Currently you're playing Waiting the game", 150, 150, 30)
     @font.draw_text("Detective Sheet", 1600, 50, 50)
     @detective_sheet.draw
-    background_c = Gosu::Color.argb(0x88_000000)
+    background_c = Gosu::Color.argb(0xCC_000000)
     self.draw_quad(0, 0, background_c, WIDTH, 0, background_c, WIDTH, HEIGHT, background_c, 0, HEIGHT, background_c, 20, mode = :default)
   end
 
@@ -448,6 +448,7 @@ class Clue < Gosu::Window
   end
 
   def draw_win
+    # @border = Gosu::Image.new(self, 'media/game_images/ending.png', 100, 80, 0)
     header_message = "You've solved the case, looks like that phone call from J. Edgar Hoover was for you."
     header_width = @font.text_width(header_message)
     @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 500, 1)
