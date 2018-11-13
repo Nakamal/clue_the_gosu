@@ -31,9 +31,14 @@ class Clue < Gosu::Window
     @scene = :start 
     self.caption = 'Clue' 
     @background = Gosu::Image.new(self, 'media/final_board.png')
+    @border = Gosu::Image.new(self, 'media/game_images/ending.png') # fix the size for win and lose
+    @start_image = Gosu::Image.new(self, 'media/game_images/official_clue_opening_image.png')
+
   
     @font = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 30)
     @font_2 = Gosu::Font.new(self, "media/pythago0.ttf", HEIGHT / 5)
+    @font_3 = Gosu::Font.new(self, "media/pythago0.ttf", HEIGHT / 12)
+    @font_4 = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 25)
     self.text_input = Gosu::TextInput.new
     self.text_input.text = ""
     @last_time = 0
@@ -121,7 +126,7 @@ class Clue < Gosu::Window
   def initialize_start
     @start_music = Gosu::Song.new('media/music/01_main_title.mp3')
     @start_music.play(looping = true)   
-    @new_game_button = Button.new(window: self, x: 1200, y: 847, text: "New Game")
+    @new_game_button = Button.new(window: self, x: 1700, y: 700, text: "New Game")
   end
 
   def update_start
@@ -133,11 +138,11 @@ class Clue < Gosu::Window
   end
 
   def draw_start
-    @font_2.draw_text("Clue", 900, 100, 1)
-    @font.draw_text("Welcome to Hill House", 950, 400, 1)
-    @font.draw_text("Press Enter to begin", 970, 1300, 1)
+    @start_image.draw(200, 90, 0)
+    @font_3.draw_text("Welcome to Hill House", 1180, 200, 1)
+    @font_4.draw_text("Press button to begin or type game id", 1130, 1100, 1)
 
-    @font.draw_text(self.text_input.text, 1155, 700, 1)
+    @font_4.draw_text(self.text_input.text, 1650, 600, 1)
     @new_game_button.draw
   end 
 
@@ -448,7 +453,7 @@ class Clue < Gosu::Window
   end
 
   def draw_win
-    # @border = Gosu::Image.new(self, 'media/game_images/ending.png', 100, 80, 0)
+    @border.draw(100, 80, 0)
     header_message = "You've solved the case, looks like that phone call from J. Edgar Hoover was for you."
     header_width = @font.text_width(header_message)
     @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 500, 1)
