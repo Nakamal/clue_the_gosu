@@ -226,7 +226,7 @@ class Clue < Gosu::Window
   def initialize_waiting
     @start_music = Gosu::Song.new('media/music/04_may_i_present_mr_boddy.mp3')
     @start_music.play(looping = true)
-    @start_game_button = Button.new(window: self, x: 450, y: 680, text: "Start Game")
+    @start_game_button = Button.new(window: self, x: 440, y: 680, text: "Start Game")
     @players = []
     @last_time = Gosu::milliseconds
   end
@@ -490,17 +490,17 @@ class Clue < Gosu::Window
 
   def draw_lose
     @border.draw(30, 10, 0)
-    @lose_image.draw(70, 70, 0)
+    @lose_image.draw(740, 500, 0)
     header_message = "No, communism was just a red herring."
     header_width = @font.text_width(header_message)
-    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 100, 1)
+    @font.draw_text(header_message, (WIDTH / 2) - (header_width / 2), 200, 1)
     if @game_status 
       loser_message = "You've lost, but you can still move around to mess other players up, what fun"
       loser_width = @font.text_width(loser_message)
-      @font.draw_text(loser_message, (WIDTH / 2) - (loser_width / 2), 250, 1)
+      @font.draw_text(loser_message, (WIDTH / 2) - (loser_width / 2), 300, 1)
       loser_command = "Press 'enter' to keep playing...(yes you have to keep playing)"
       loser_command_width = @font.text_width(loser_command)
-      @font.draw_text(loser_command, (WIDTH / 2) - (loser_command_width / 2), 350, 1)
+      @font.draw_text(loser_command, (WIDTH / 2) - (loser_command_width / 2), 400, 1)
     end
   end
 
