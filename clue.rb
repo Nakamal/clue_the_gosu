@@ -29,17 +29,20 @@ class Clue < Gosu::Window
     super(WIDTH, HEIGHT, false)
     @board = Board.new(window: self)
     @scene = :start 
-    self.caption = 'Clue' 
+    self.caption = 'Clue'
+
     @background = Gosu::Image.new(self, 'media/final_board.png')
     @border = Gosu::Image.new(self, 'media/game_images/ending.png') # fix the size for win and lose
     @start_image = Gosu::Image.new(self, 'media/game_images/official_clue_opening_image.png')
     @character_select_image = Gosu::Image.new(self, 'media/game_images/clue_alt_image.png')
+    @waiting_image = Gosu::Image.new(self, 'media/game_images/clue_card.png')
 
   
     @font = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 30)
     @font_2 = Gosu::Font.new(self, "media/pythago0.ttf", HEIGHT / 5)
     @font_3 = Gosu::Font.new(self, "media/pythago0.ttf", HEIGHT / 12)
     @font_4 = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 25)
+
     self.text_input = Gosu::TextInput.new
     self.text_input.text = ""
     @last_time = 0
@@ -221,7 +224,7 @@ class Clue < Gosu::Window
   def initialize_waiting
     @start_music = Gosu::Song.new('media/music/04_may_i_present_mr_boddy.mp3')
     @start_music.play(looping = true)
-    @start_game_button = Button.new(window: self, x: 1200, y: 847, text: "Start Game")
+    @start_game_button = Button.new(window: self, x: 450, y: 680, text: "Start Game")
     @players = []
     @last_time = Gosu::milliseconds
   end
@@ -240,11 +243,12 @@ class Clue < Gosu::Window
   end
 
   def draw_waiting
-    @font.draw_text("waiting", 1050, 100, 1)
-    @font.draw_text("Player Name: #{@player_name}", 1050, 250, 1)
-    @font.draw_text("Character Name: #{@character_name}", 1050, 400, 1)
+    @waiting_image.draw(1400, 100, 0) # clean up image 
+    @font.draw_text("Player Name: #{@player_name}", 100, 250, 1)
+    @font.draw_text("Character Name: #{@character_name}", 100, 400, 1)
+    @font.draw_text("Waiting for players", 160, 980, 1)
     @font.draw_text(@message, 1050, 400, 1)
-    @font.draw_text("Game Id: #{@current_game_id}", 70, 70, 1)
+    @font.draw_text("Game Id: #{@current_game_id}", 100, 100, 1)
     @start_game_button.draw if @game_organizer == true
   end 
 
