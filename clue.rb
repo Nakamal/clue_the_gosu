@@ -95,8 +95,8 @@ class Clue < Gosu::Window
       draw_lose
     end 
 
-    @font.draw_text("X: #{mouse_x.round(0)}", 2000, 50, 1) # remove once you have the visuals in place
-    @font.draw_text("Y: #{mouse_y.round(0)}", 2200, 50, 1) # remove once you have the visuals in place
+    # @font.draw_text("X: #{mouse_x.round(0)}", 2000, 50, 1) # remove once you have the visuals in place
+    # @font.draw_text("Y: #{mouse_y.round(0)}", 2200, 50, 1) # remove once you have the visuals in place
   end
 
   def button_down(id)
@@ -309,7 +309,8 @@ class Clue < Gosu::Window
 
   end
 
-  def draw_game 
+  def draw_game
+    @font.draw_text("What room would you like to investigate?", 180, 40, 0) 
     @background.draw(100,80,0)
     # @board.draw # uncomment to see the colors
     @players.each { |player| player.draw }
