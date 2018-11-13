@@ -25,7 +25,7 @@ class PopUpWindow
     y_3 = y_2 + height - (border * 2)
     x_4 = x_1
     y_4 = y_3
-    tint = Gosu::Color.argb(0xBB_000080)
+    tint = Gosu::Color.argb(0xFE_13133a)
     window.draw_quad(x_1, y_1, tint, x_2, y_2, tint, x_3, y_3, tint, x_4, y_4, tint, z, mode = :default)
   end
 end

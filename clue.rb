@@ -63,8 +63,8 @@ class Clue < Gosu::Window
     @rooms = Room.all
     @weapon_buttons = Weapon.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
     @character_buttons = Character.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
-    @suggestion_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, text: "Suggestion")
-    @accusation_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y + button_height, z: @pop_up.z + 1, text: "Accusation")
+    @suggestion_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y + 50, z: @pop_up.z + 1, text: "Suggestion")
+    @accusation_button = Button.new(window: self, x: pop_up_offset_x, y: pop_up_offset_y + 90 + button_height, z: @pop_up.z + 1, text: "Accusation")
   end
 
   def update 
@@ -292,7 +292,7 @@ class Clue < Gosu::Window
   def draw_game_waiting
     @background.draw(100,80,0)
     @board.draw
-    @font.draw_text("Currently you're playing Waiting the game", 150, 150, 30)
+    @font.draw_text("Currently you're playing, Waiting... the game", 150, 150, 30)
     @font.draw_text("Detective Sheet", 1600, 50, 50)
     @detective_sheet.draw
     background_c = Gosu::Color.argb(0xCC_000000)
@@ -350,16 +350,22 @@ class Clue < Gosu::Window
 
     when :weapon_buttons
       @pop_up.draw
-      header_message = "And how do you think said shifty suspect accomplished this vile feat?"
+      header_message = "And with what do you think said shifty"
       header_width = @font.text_width(header_message)
       @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
+      header_message = "suspect accomplished this vile feat?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 120, z + 1)
       @weapon_buttons.each { |weapon_button| weapon_button.draw }
 
     when :decision_buttons
       @pop_up.draw
-      header_message = "Are you making a suggestion or an accusation?"
+      header_message = "Are you making a suggestion?"
       header_width = @font.text_width(header_message)
       @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 50, z + 1)
+      header_message = "Or is that an accusation?"
+      header_width = @font.text_width(header_message)
+      @font.draw_text(header_message, @pop_up.center_x - (header_width / 2), @pop_up.y + 120, z + 1)
       @suggestion_button.draw
       @accusation_button.draw
     end 
