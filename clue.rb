@@ -16,7 +16,7 @@ require_relative 'models/room'
 require_relative 'models/space'
 require_relative 'models/weapon'
 
-BASE_ROOT_URL = "https://clue-the-heroku.herokuapp.com"
+BASE_ROOT_URL = "http://localhost:3000" # "https://clue-the-heroku.herokuapp.com"
 
 class Clue < Gosu::Window 
   WIDTH = 2400
@@ -374,8 +374,9 @@ class Clue < Gosu::Window
   end 
 
   def button_down_game(id)
-    if !@keep_playing
+    if !@keep_playing 
       if id == 40
+        response = HTTP.post("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/next_turn_loser")
         @scene = :game_waiting
         initialize_game_waiting
       end
@@ -422,6 +423,7 @@ class Clue < Gosu::Window
                    }
 
           parsed_response = HTTP.patch("#{BASE_ROOT_URL}/api/participations/#{@participation_id}/turn", form: params).parse
+
           if parsed_response["move_forward"]
             @scene = :game_waiting
             initialize_game_waiting
