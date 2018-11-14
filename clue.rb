@@ -258,10 +258,9 @@ class Clue < Gosu::Window
     if @game_organizer && (id == Gosu::MsLeft) && (mouse_x - @start_game_button.x).abs < (@start_game_button.width / 2) && (mouse_y - @start_game_button.y).abs < (@start_game_button.height / 2)
       response = HTTP.patch("#{BASE_ROOT_URL}/api/games/#{@current_game_id}/start")
 
-      if response.parse["start_game"] == "true"
-        @scene = :game_waiting
-        initialize_game_waiting
-      end
+      # add a happy/sad path to resest and try starting game again for safety
+      @scene = :game_waiting
+      initialize_game_waiting
     end  
   end
 
