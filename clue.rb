@@ -16,7 +16,7 @@ require_relative 'models/room'
 require_relative 'models/space'
 require_relative 'models/weapon'
 
-BASE_ROOT_URL = "http://localhost:3000" # "https://clue-the-heroku.herokuapp.com"
+BASE_ROOT_URL = "https://clue-the-heroku.herokuapp.com"
 
 class Clue < Gosu::Window 
   WIDTH = 2400
