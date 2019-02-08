@@ -16,7 +16,7 @@ require_relative 'models/room'
 require_relative 'models/space'
 require_relative 'models/weapon'
 
-BASE_ROOT_URL = "http://localhost:3000"
+BASE_ROOT_URL = "https://clue-the-heroku.herokuapp.com"
 
 class Clue < Gosu::Window 
   WIDTH = 2400
@@ -31,13 +31,13 @@ class Clue < Gosu::Window
     @scene = :start 
     self.caption = 'Clue'
 
-    @background = Gosu::Image.new(self, 'media/final_board.png')
-    @border = Gosu::Image.new(self, 'media/game_images/win_lose_edited.png') # fix the size for win and lose
-    @start_image = Gosu::Image.new(self, 'media/game_images/official_clue_opening_image.png')
-    @character_select_image = Gosu::Image.new(self, 'media/game_images/clue_alt_image.png')
-    @waiting_image = Gosu::Image.new(self, 'media/game_images/clue_card.png')
-    @win_image = Gosu::Image.new(self, 'media/game_images/win_picture.png')
-    @lose_image = Gosu::Image.new(self, 'media/game_images/lose_picture.png')
+    @background = Gosu::Image.new('media/final_board.png')
+    @border = Gosu::Image.new('media/game_images/win_lose_edited.png') 
+    @start_image = Gosu::Image.new('media/game_images/official_clue_opening_image.png')
+    @character_select_image = Gosu::Image.new('media/game_images/clue_alt_image.png')
+    @waiting_image = Gosu::Image.new('media/game_images/clue_card.png')
+    @win_image = Gosu::Image.new('media/game_images/win_picture.png')
+    @lose_image = Gosu::Image.new('media/game_images/lose_picture.png')
 
   
     @font = Gosu::Font.new(self, "media/GalliaMTStd.otf", HEIGHT / 30)
@@ -61,7 +61,6 @@ class Clue < Gosu::Window
     pop_up_offset_y = @pop_up.y + 240
     button_height = 110
 
-    # @room_buttons = Room.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
     @rooms = Room.all
     @weapon_buttons = Weapon.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
     @character_buttons = Character.buttons(window: self, x: pop_up_offset_x, y: pop_up_offset_y, z: @pop_up.z + 1, height: button_height)
@@ -186,7 +185,7 @@ class Clue < Gosu::Window
   end
 
   def draw_character_selecting
-    @character_select_image.draw(200, 100, 0) # edit out the name 'clue' and the white border from this picture 
+    @character_select_image.draw(200, 100, 0) 
     @font_4.draw_text("Choose your Character", 1470, 200, 1)
     @available_characters.each {|character_button| character_button.draw }
     @font.draw_text("Player ID: #{self.text_input.text}", 1360, 80, 1)
