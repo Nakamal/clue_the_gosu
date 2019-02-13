@@ -14,7 +14,7 @@ class Player
     @my_turn = json_hash["my_turn"]
     @current_location_x = json_hash["current_location_x"].to_i
     @current_location_y = json_hash["current_location_y"].to_i
-    @piece = Gosu::Image.new(window, "media/character_pieces/#{@character.image}")
+    @piece = Gosu::Image.new("media/character_pieces/#{@character.image}")
   end
 
   def draw
